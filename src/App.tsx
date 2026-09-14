@@ -1,5 +1,7 @@
+import MotoristaAgregadoScreen from "./components/motoristas/MotoristaAgregadoScreen";
+
 function App() {
-  return <div>newelog-frota-web</div>
+  return <MotoristaAgregadoScreen />;
 }
 
-export default App
+export default App;
