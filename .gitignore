@@ -7,18 +7,34 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependências
 node_modules
 dist
 dist-ssr
+
+# Variáveis de Ambiente (ignora chaves secretas, mantém apenas o modelo)
+.env
+.env.*
+!.env.example
+
+# Caches de Build / Ferramentas (Vite, TS)
+.vite
+*.tsbuildinfo
+
+# Arquivos locais e temporários
 *.local
 
-# Editor directories and files
+# Editores e IDEs
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Sistema Operacional (Windows / macOS)
+Thumbs.db
+[Ee]xternals.db
+.DS_Store
