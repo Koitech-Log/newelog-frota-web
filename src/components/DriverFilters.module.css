@@ -1,0 +1,106 @@
+.bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+  align-items: center;
+}
+
+.searchField {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--surface-0);
+  border: 1px solid var(--line-faint);
+  border-radius: 20px;
+  padding: 8px 15px;
+  min-width: 200px;
+  flex: 1;
+  max-width: 320px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchField:focus-within {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.searchField svg {
+  color: var(--ink-faint);
+  font-size: 13px;
+  transition: color 0.2s ease;
+}
+
+.searchField:focus-within svg {
+  color: var(--brand);
+}
+
+@media (max-width: 520px) {
+  .searchField {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+
+.searchField input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--ink);
+  font-size: 13px;
+  font-family: var(--font-body);
+  width: 100%;
+}
+
+.searchField input::placeholder {
+  color: var(--ink-faint);
+}
+
+.chip {
+  font-size: 12.5px;
+  padding: 7.5px 15px;
+  border-radius: 20px;
+  border: 1px solid var(--line-faint);
+  color: var(--ink-dim);
+  background: var(--surface-0);
+  cursor: pointer;
+  transition: transform 0.15s var(--ease-out), border-color 0.2s ease, color 0.2s ease,
+    background 0.2s ease;
+  font-family: var(--font-body);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chip:hover {
+  border-color: var(--brand-dim);
+  color: var(--ink);
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+.dot {
+  font-size: 7px;
+}
+
+.dotGreen {
+  color: var(--green);
+}
+
+.dotRed {
+  color: var(--red);
+}
+
+.chip.active .dotGreen,
+.chip.active .dotRed {
+  filter: brightness(2.2);
+}
+
+.chip.active {
+  background: var(--brand);
+  color: #ffffff;
+  border-color: var(--brand);
+  font-weight: 600;
+}

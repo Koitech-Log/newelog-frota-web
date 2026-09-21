@@ -1,0 +1,273 @@
+/* ============ SIDEBAR ============ */
+.sidebar {
+  width: 256px;
+  min-width: 256px;
+  background: #ffffff;
+  border-right: 1px solid #e2e6ef;
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 50;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ============ MOBILE SIDEBAR ============ */
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 256px;
+    min-width: 256px;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 20px 0 40px rgba(23, 27, 33, 0.14);
+    z-index: 70;
+    pointer-events: none;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+}
+
+/* ============ BRAND ============ */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px 22px;
+  border-bottom: 1px solid #e2e6ef;
+  margin-bottom: 18px;
+}
+
+.brandMark {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #1f4af4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 19px;
+  flex-shrink: 0;
+  box-shadow: 0 8px 18px -4px rgba(31, 74, 244, 0.45);
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+}
+
+.n1 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #171b21;
+  line-height: 1.1;
+}
+
+.n2 {
+  font-size: 9.5px;
+  color: #8a93a3;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ============ NAVIGATION ============ */
+.navGroupLabel {
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: #8a93a3;
+  font-weight: 700;
+  padding: 0 22px;
+  margin: 10px 0 8px;
+}
+
+.navlink {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 22px;
+  color: #3b424e;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.navlink svg {
+  width: 17px;
+  height: 17px;
+  color: #6b7788;
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.navlink:hover {
+  background: rgba(31, 74, 244, 0.04);
+  color: #171b21;
+}
+
+.navlink:hover svg {
+  color: #1f4af4;
+}
+
+/* ============ ITEM ATIVO (IGUAL PROTÓTIPO) ============ */
+.navlink.active {
+  color: #171b21 !important;
+  background: #edf2ff !important;
+  font-weight: 600;
+}
+
+.navlink.active svg {
+  color: #1f4af4 !important;
+}
+
+.navlink.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 4px;
+  background: #1f4af4;
+  border-radius: 0 4px 4px 0;
+}
+
+/* ============ COUNT BADGE ============ */
+.count {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  background: #e9eef7;
+  padding: 2px 7px;
+  border-radius: 12px;
+}
+
+/* ============ SIDEBAR FOOTER ============ */
+.sidebarFoot {
+  margin-top: auto;
+  padding: 16px 20px 0;
+  border-top: 1px solid #e2e6ef;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ============ PROFILE SWITCH ============ */
+.profileSwitchLabel {
+  font-size: 10px;
+  color: #8a93a3;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.profileToggle {
+  display: flex;
+  background: #f4f6fb;
+  border: 1px solid #e2e6ef;
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.profileBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: transparent;
+  border: none;
+  color: #5b6472;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 6px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profileBtn svg {
+  font-size: 12px;
+}
+
+.profileBtn:hover {
+  color: #171b21;
+}
+
+/* Gestor Ativo em Azul Vivo */
+.profileBtn.profileActive {
+  background: #1f4af4 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(31, 74, 244, 0.35);
+}
+
+.profileBtn.profileActive svg {
+  color: #ffffff !important;
+}
+
+/* ============ STATUS ============ */
+.statusPill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #6b7788;
+  padding-top: 2px;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1e9e5a;
+  box-shadow: 0 0 6px rgba(30, 158, 90, 0.4);
+  flex-shrink: 0;
+}
+
+/* ============ SCRIM MOBILE ============ */
+.sidebarScrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 8, 10, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 60;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+@media (max-width: 900px) {
+  .sidebarScrim {
+    display: block;
+  }
+
+  .sidebarScrim.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
