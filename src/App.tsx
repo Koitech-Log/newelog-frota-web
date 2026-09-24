@@ -4,9 +4,11 @@ import { icons } from "./components/icons";
 import { Sidebar } from "./components/Sidebar";
 import { DriversPage } from "./pages/DriversPage";
 import { ProfileProvider } from "./context/ProfileContext";
+import { useMotoristas } from "./hooks/useMotoristas";
 
 export function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { totalElementos: motoristasCount } = useMotoristas({ page: 0, size: 1 });
 
   return (
     <ProfileProvider>
@@ -14,6 +16,7 @@ export function App() {
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
+          motoristasCount={motoristasCount}
         />
 
         <div className="content-col">

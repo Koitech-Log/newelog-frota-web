@@ -71,7 +71,9 @@ export function DriverCard({ motorista, onSelecionar, indice = 0 }: DriverCardPr
         </div>
       </div>
 
-      <RadialGauge percentual={utilizacao} tamanho={64} />
+      <div className={styles.utilizationWrap}>
+        <RadialGauge percentual={utilizacao} tamanho={64} />
+      </div>
       <FontAwesomeIcon icon={icons.chevronRight} className={styles.chevron} aria-hidden />
     </button>
   );

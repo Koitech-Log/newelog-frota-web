@@ -7,9 +7,10 @@ import styles from "./Sidebar.module.css";
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  motoristasCount?: number;
 }
 
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, motoristasCount = 0 }: SidebarProps) {
   // Mantém 'drivers' selecionado por defeito
   const [activeTab, setActiveTab] = useState<string>("drivers");
   const { perfil, setPerfil } = useProfile();
@@ -80,7 +81,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           >
             <FontAwesomeIcon icon={icons.idCard} />
             <span>Motoristas</span>
-            <span className={styles.count}>6</span>
+            <span className={styles.count}>{motoristasCount}</span>
           </button>
 
           <button
