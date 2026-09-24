@@ -32,6 +32,8 @@ const OPCOES_TIPO_VEIULO: { valor: string | "all"; rotulo: string }[] = [
   {valor: "3/4", rotulo: "3/4" },
   {valor: "Toco", rotulo: "Toco" },
   {valor: "Truck", rotulo: "Truck" },
+  {valor: "Cavalo Mecânico", rotulo: "Cavalo Mecânico"},
+  {valor: "Bi-Truck", rotulo: "Bi-Truck"},
 ];
 
 export function DriverFilters({
