@@ -14,6 +14,7 @@ export function DriversPage() {
   const [busca, setBusca] = useState("");
   const [destino, setDestino] = useState("");
   const [statusAtivo, setStatusAtivo] = useState<StatusMotorista | "all">("all");
+  const [tipoVeiculoAtivo, setTipoVeiculoAtivo] = useState<string | "all">("all");
   const [pagina, setPagina] = useState(0);
   const [motoristaSelecionado, setMotoristaSelecionado] = useState<number | null>(null);
   const [toast, setToast] = useState<{ mensagem: string; tipo: "success" | "error" } | null>(
@@ -25,9 +26,10 @@ export function DriversPage() {
       status: statusAtivo === "all" ? undefined : statusAtivo,
       busca: busca || undefined,
       destino: destino || undefined,
+      tipoVeiculo: tipoVeiculoAtivo === "all" ? undefined : tipoVeiculoAtivo,
       page: pagina,
     }),
-    [statusAtivo, busca, destino, pagina]
+    [statusAtivo, busca, destino, tipoVeiculoAtivo, pagina]
   );
 
   const {
@@ -66,6 +68,8 @@ export function DriversPage() {
         onDestinoChange={(v) => handleFiltroChange(() => setDestino(v))}
         statusAtivo={statusAtivo}
         onStatusChange={(v) => handleFiltroChange(() => setStatusAtivo(v))}
+        tipoVeiculoAtivo={tipoVeiculoAtivo}
+        onTipoVeiculoChange={(v) => handleFiltroChange(() => setTipoVeiculoAtivo(v))}
       />
 
       {erro && (

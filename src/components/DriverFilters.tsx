@@ -10,6 +10,8 @@ interface DriverFiltersProps {
   onDestinoChange: (valor: string) => void;
   statusAtivo: StatusMotorista | "all";
   onStatusChange: (status: StatusMotorista | "all") => void;
+  tipoVeiculoAtivo: string | "all";
+  onTipoVeiculoChange: (tipoVeiculo: string | "all") => void;
 }
 
 const OPCOES_STATUS: {
@@ -22,6 +24,16 @@ const OPCOES_STATUS: {
   { valor: "EM_OPERACAO", rotulo: "Em operação", dotClass: "dotRed" },
 ];
 
+const OPCOES_TIPO_VEIULO: { valor: string | "all"; rotulo: string }[] = [
+  { valor: "all", rotulo:"Todos os veículos" },
+  {valor: "Fiorino", rotulo: "Fiorino" },
+  {valor: "Van", rotulo: "Van" },
+  {valor: "VUC", rotulo: "VUC" },
+  {valor: "3/4", rotulo: "3/4" },
+  {valor: "Toco", rotulo: "Toco" },
+  {valor: "Truck", rotulo: "Truck" },
+];
+
 export function DriverFilters({
   busca,
   onBuscaChange,
@@ -29,6 +41,8 @@ export function DriverFilters({
   onDestinoChange,
   statusAtivo,
   onStatusChange,
+  tipoVeiculoAtivo,
+  onTipoVeiculoChange,
 }: DriverFiltersProps) {
   return (
     <div className={styles.bar}>
@@ -66,6 +80,17 @@ export function DriverFilters({
               aria-hidden
             />
           )}
+          {opcao.rotulo}
+        </button>
+      ))}
+
+      {OPCOES_TIPO_VEIULO.map((opcao) => (
+        <button
+          key = {opcao.valor}
+          type = "button"
+                    className={`${styles.chip} ${tipoVeiculoAtivo === opcao.valor ? styles.active : ""}`}
+          onClick={() => onTipoVeiculoChange(opcao.valor)}
+        >
           {opcao.rotulo}
         </button>
       ))}
