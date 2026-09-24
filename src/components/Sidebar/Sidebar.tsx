@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../icons";
 import { useProfile } from "../../context/ProfileContext";
+import { useImportManifesto } from "../../context/ImportManifestoContext";
 import styles from "./Sidebar.module.css";
 
 interface SidebarProps {
@@ -14,11 +15,20 @@ export function Sidebar({ isOpen, onClose, motoristasCount = 0 }: SidebarProps) 
   // Mantém 'drivers' selecionado por defeito
   const [activeTab, setActiveTab] = useState<string>("drivers");
   const { perfil, setPerfil } = useProfile();
+  const { abrirModal } = useImportManifesto();
 
   const handleNavClick = (tabKey: string) => {
     // Se clicar em motoristas, apenas fecha o menu no telemóvel
     if (tabKey === "drivers") {
       setActiveTab("drivers");
+      if (window.innerWidth <= 900) {
+        onClose();
+      }
+      return;
+    }
+
+    if (tabKey === "import") {
+      abrirModal();
       if (window.innerWidth <= 900) {
         onClose();
       }
@@ -102,7 +112,7 @@ export function Sidebar({ isOpen, onClose, motoristasCount = 0 }: SidebarProps) 
             onClick={() => handleNavClick("import")}
           >
             <FontAwesomeIcon icon={icons.fileImport} />
-            <span>Importar XML</span>
+            <span>Importar CSV</span>
           </button>
 
           <button

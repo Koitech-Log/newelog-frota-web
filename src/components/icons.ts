@@ -16,6 +16,8 @@ import {
   faRankingStar,
   faFileImport,
   faFileExport,
+  faCloudArrowUp,
+  faShieldHalved,
 
   // ==================== FROTA / VEÍCULOS ====================
   faTruck,
@@ -67,6 +69,8 @@ export const icons = {
   rankingStar: faRankingStar,
   fileImport: faFileImport,
   fileExport: faFileExport,
+  cloudUpload: faCloudArrowUp,
+  shield: faShieldHalved,
 
   // Frota
   truck: faTruck,
