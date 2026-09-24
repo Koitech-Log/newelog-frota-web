@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMotoristas } from "../hooks/useMotoristas";
 import { DriverFilters } from "../components/DriverFilters";
@@ -7,6 +7,7 @@ import { DriverDrawer } from "../components/DriverDrawer";
 import { Pagination } from "../components/Pagination";
 import { Toast } from "../components/Toast";
 import { icons } from "../components/icons";
+import { useImportManifesto } from "../context/ImportManifestoContext";
 import type { StatusMotorista } from "../types/motorista";
 import styles from "./DriversPage.module.css";
 
@@ -39,6 +40,14 @@ export function DriversPage() {
     erro,
     recarregar,
   } = useMotoristas(filtros);
+
+  // Recarrega a listagem sempre que uma importação de manifesto é concluída
+  // com sucesso — o modal roda fora desta página (ver ImportManifestoContext).
+  const { versaoImportacao } = useImportManifesto();
+  useEffect(() => {
+    if (versaoImportacao > 0) recarregar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [versaoImportacao]);
 
   function handleFiltroChange(atualizar: () => void) {
     atualizar();
