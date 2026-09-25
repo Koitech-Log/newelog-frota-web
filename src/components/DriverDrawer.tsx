@@ -107,7 +107,10 @@ export function DriverDrawer({ motoristaId, onClose, aoAtualizarStatus }: Driver
                       motorista.status === "DISPONIVEL" ? styles.disp : styles.ocup
                     }`}
                   >
-                    <FontAwesomeIcon icon={icons.dot} className={styles.statusDot} />
+                    <FontAwesomeIcon
+                      icon={motorista.status === "DISPONIVEL" ? icons.success : icons.truck}
+                      className={styles.statusIcon}
+                    />
                     {motorista.status === "DISPONIVEL"
                       ? "Disponível para nova operação"
                       : "Em operação"}
@@ -260,9 +263,11 @@ export function DriverDrawer({ motoristaId, onClose, aoAtualizarStatus }: Driver
                             <FontAwesomeIcon icon={icons.star} className={styles.starIcon} />
                           )}
                         </span>
-                        <span className={styles.tripValue}>
-                          {formatadorMoeda.format(viagem.valorFrete)}
-                        </span>
+                        {podeVerFinanceiro && (
+                          <span className={styles.tripValue}>
+                            {formatadorMoeda.format(viagem.valorFrete)}
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>

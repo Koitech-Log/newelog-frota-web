@@ -51,6 +51,7 @@ export function DriverCard({ motorista, onSelecionar, indice = 0 }: DriverCardPr
             </div>
           </div>
           <span className={`${styles.statusTag} ${disponivel ? styles.disp : styles.ocup}`}>
+            <FontAwesomeIcon icon={disponivel ? icons.success : icons.truck} aria-hidden />
             {disponivel ? "Disponível" : "Em operação"}
           </span>
         </div>

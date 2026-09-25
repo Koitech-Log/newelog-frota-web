@@ -143,6 +143,13 @@
   border-radius: 20px;
   white-space: nowrap;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.statusTag svg {
+  font-size: 10px;
 }
 
 .disp {

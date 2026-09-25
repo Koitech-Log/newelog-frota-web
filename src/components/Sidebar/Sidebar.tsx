@@ -9,9 +9,10 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   motoristasCount?: number;
+  frotaCount?: number;
 }
 
-export function Sidebar({ isOpen, onClose, motoristasCount = 0 }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, motoristasCount = 0, frotaCount = 0 }: SidebarProps) {
   // Mantém 'drivers' selecionado por defeito
   const [activeTab, setActiveTab] = useState<string>("drivers");
   const { perfil, setPerfil } = useProfile();
@@ -80,7 +81,7 @@ export function Sidebar({ isOpen, onClose, motoristasCount = 0 }: SidebarProps) 
           >
             <FontAwesomeIcon icon={icons.truck} />
             <span>Frota</span>
-            <span className={styles.count}>7</span>
+            <span className={styles.count}>{frotaCount}</span>
           </button>
 
           {/* Botão ativo da sua página atual */}
