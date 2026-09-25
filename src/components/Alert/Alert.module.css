@@ -1,0 +1,44 @@
+.alert {
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon {
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.titulo {
+    font-weight: 600;
+}
+
+.body {
+    margin-top: 10px;
+}
+
+.warning {
+    background: var(--amber-soft);
+    color: var(--amber-dim);
+}
+
+.error {
+    background: var(--red-soft);
+    color: var(--red);
+}
+
+.success {
+    background: var(--green-soft);
+    color: var(--green);
+}
+
+.info {
+    background: var(--surface-2);
+    color: var(--ink-dim);
+}

@@ -1,0 +1,28 @@
+.lista {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+}
+
+.itemIcon {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.itemNome {
+    font-weight: 500;
+    flex: 1;
+}
+
+.itemMeta {
+    color: var(--ink-faint);
+}

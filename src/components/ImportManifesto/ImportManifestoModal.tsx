@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../icons";
 import { useImportarManifesto } from "../../hooks/useImportarManifesto";
 import styles from "./ImportManifestoModal.module.css";
+import { AlertaMotoristasNaoEncontrados } from "../Alert/AlertaMotoristasNaoEncontrados";
 
 interface ImportManifestoModalProps {
   aberto: boolean;
@@ -117,15 +118,7 @@ export function ImportManifestoModal({
           )}
 
           {estado === "atencao" && resultado && (
-            <div className={`${styles.status} ${styles.atencao}`}>
-              <FontAwesomeIcon icon={icons.userPlus} />
-              <span>
-                {resultado.totalCadastrados} motorista{resultado.totalCadastrados !== 1 ? "s" : ""}{" "}
-                processado{resultado.totalCadastrados !== 1 ? "s" : ""} · {resultado.novos.length}{" "}
-                novo{resultado.novos.length !== 1 ? "s" : ""} cadastrado
-                {resultado.novos.length !== 1 ? "s" : ""} automaticamente.
-              </span>
-            </div>
+            <AlertaMotoristasNaoEncontrados motoristas={resultado.novos} />
           )}
 
           {estado !== "carregando" && resultado && resultado.totalRejeitados > 0 && (
@@ -135,25 +128,6 @@ export function ImportManifestoModal({
                 {resultado.totalRejeitados} linha{resultado.totalRejeitados !== 1 ? "s" : ""} rejeitada
                 {resultado.totalRejeitados !== 1 ? "s" : ""} (CPF/CNPJ inválido).
               </span>
-            </div>
-          )}
-
-          {resultado && resultado.novos.length > 0 && (
-            <div className={styles.logWrap}>
-              <div className={styles.logGroupLabel}>Novos motoristas cadastrados</div>
-              <div className={styles.log}>
-                {resultado.novos.map((motorista, i) => (
-                  <div key={i} className={styles.logRow}>
-                    <span className={styles.logName}>
-                      <FontAwesomeIcon icon={icons.userPlus} className={styles.logNameIcon} />
-                      {motorista.nome}
-                    </span>
-                    <span className={styles.logMeta}>
-                      {motorista.placaVeiculo ?? "sem veículo"} · novo
-                    </span>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
 
