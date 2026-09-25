@@ -10,7 +10,6 @@ export interface FiltrosMotorista {
   status?: StatusMotorista;
   destino?: string;
   busca?: string;
-  tipoVeiculo?: string;
   page?: number;
   size?: number;
 }
@@ -22,7 +21,6 @@ function paraQueryString(filtros: FiltrosMotorista): string {
   if (filtros.status) params.set("status", filtros.status);
   if (filtros.destino) params.set("destino", filtros.destino);
   if (filtros.busca) params.set("busca", filtros.busca);
-  if (filtros.tipoVeiculo) params.set("tipoVeiculo", filtros.tipoVeiculo);
   params.set("page", String(filtros.page ?? 0));
   params.set("size", String(filtros.size ?? TAMANHO_PAGINA_PADRAO));
   return `?${params.toString()}`;

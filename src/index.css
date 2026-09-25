@@ -229,23 +229,25 @@ svg {
 /* ============ SCROLLBAR ============ */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--surface-3) transparent;
+  scrollbar-color: var(--brand-dim) var(--surface-1);
 }
 
 *::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 10px;
+  height: 10px;
 }
 
 *::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--surface-1);
+  border-radius: 999px;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: var(--surface-3);
+  background: linear-gradient(180deg, var(--brand), var(--brand-dim));
+  border: 2px solid var(--surface-1);
   border-radius: 999px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-faint);
+  background: var(--brand);
 }

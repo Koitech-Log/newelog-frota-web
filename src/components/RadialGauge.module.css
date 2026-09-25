@@ -30,6 +30,10 @@
   stroke: var(--green);
 }
 
+.gauge.media .fill {
+  stroke: var(--brand);
+}
+
 .gauge.baixa .fill {
   stroke: var(--red);
 }
