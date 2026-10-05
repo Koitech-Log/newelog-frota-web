@@ -1,7 +1,7 @@
 .scrim {
   position: fixed;
   inset: 0;
-  background: rgba(10, 14, 20, 0.45);
+  background: var(--shadow-scrim);
   z-index: 80;
   opacity: 0;
   visibility: hidden;
@@ -25,9 +25,10 @@
   border-left: 1px solid var(--line-faint);
   z-index: 90;
   transform: translateX(100%);
-  transition: transform 0.4s var(--ease-out);
+  transition: transform 0.4s var(--ease-out), background var(--transition-theme),
+    border-color var(--transition-theme);
   overflow-y: auto;
-  box-shadow: -20px 0 50px rgba(23, 27, 33, 0.16);
+  box-shadow: var(--shadow-pop);
 }
 
 .drawer.open {
@@ -211,7 +212,7 @@
 }
 
 .starIcon {
-  color: #f5b301;
+  color: var(--star);
   font-size: 10px;
   margin-left: 5px;
 }

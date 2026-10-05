@@ -112,7 +112,7 @@
   align-items: center;
   gap: 8px;
   background: var(--red-soft);
-  border: 1px solid rgba(217, 58, 63, 0.3);
+  border: 1px solid var(--red-border);
   border-radius: 12px;
   padding: 20px;
   text-align: center;

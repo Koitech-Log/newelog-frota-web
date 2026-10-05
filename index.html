@@ -10,6 +10,19 @@
       rel="stylesheet"
     />
     <title>NEWELOG Frota · Motoristas</title>
+    <script>
+      // Aplica o tema salvo (ou a preferência do sistema) antes da primeira
+      // pintura, evitando o "flash" de tema claro ao carregar em modo escuro.
+      (function () {
+        try {
+          var salvo = localStorage.getItem("newelog:tema");
+          var escuro = salvo
+            ? salvo === "escuro"
+            : window.matchMedia("(prefers-color-scheme: dark)").matches;
+          document.documentElement.setAttribute("data-theme", escuro ? "dark" : "light");
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

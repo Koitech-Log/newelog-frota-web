@@ -4,6 +4,7 @@ import { icons } from "./components/icons";
 import { Sidebar } from "./components/Sidebar";
 import { DriversPage } from "./pages/DriversPage";
 import { ProfileProvider } from "./context/ProfileContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { useMotoristas } from "./hooks/useMotoristas";
 import { ImportManifestoProvider, useImportManifesto } from "./context/ImportManifestoContext";
 
@@ -13,6 +14,15 @@ const TAMANHO_LOTE_FROTA = 500;
 
 function MobileTopbar({ onAbrirMenu }: { onAbrirMenu: () => void }) {
   const { abrirModal } = useImportManifesto();
+  const { isEscuro, alternarTema } = useTheme();
+
+  const handleAlternarTema = () => {
+    document.documentElement.classList.add("theme-transitioning");
+    alternarTema();
+    window.setTimeout(() => {
+      document.documentElement.classList.remove("theme-transitioning");
+    }, 400);
+  };
 
   return (
     <header className="mobile-topbar">
@@ -25,14 +35,25 @@ function MobileTopbar({ onAbrirMenu }: { onAbrirMenu: () => void }) {
         <span>NEWELOG</span>
       </div>
 
-      <button
-        type="button"
-        className="mobile-import-btn"
-        aria-label="Importar manifesto (CSV)"
-        onClick={abrirModal}
-      >
-        <FontAwesomeIcon icon={icons.fileImport} />
-      </button>
+      <div style={{ display: "flex", gap: "8px" }}>
+        <button
+          type="button"
+          className="mobile-import-btn"
+          aria-label={isEscuro ? "Mudar para tema claro" : "Mudar para tema escuro"}
+          onClick={handleAlternarTema}
+        >
+          <FontAwesomeIcon icon={isEscuro ? icons.sun : icons.moon} />
+        </button>
+
+        <button
+          type="button"
+          className="mobile-import-btn"
+          aria-label="Importar manifesto (CSV)"
+          onClick={abrirModal}
+        >
+          <FontAwesomeIcon icon={icons.fileImport} />
+        </button>
+      </div>
     </header>
   );
 }
@@ -56,27 +77,29 @@ export function App() {
   }, [motoristasParaFrota]);
 
   return (
-    <ProfileProvider>
-      <ImportManifestoProvider>
-        <div className="app">
-          <Sidebar
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-            motoristasCount={motoristasCount}
-            frotaCount={frotaCount}
-          />
+    <ThemeProvider>
+      <ProfileProvider>
+        <ImportManifestoProvider>
+          <div className="app">
+            <Sidebar
+              isOpen={isSidebarOpen}
+              onClose={() => setIsSidebarOpen(false)}
+              motoristasCount={motoristasCount}
+              frotaCount={frotaCount}
+            />
 
-          <div className="content-col">
-            {/* Cabeçalho visível em ecrãs móveis */}
-            <MobileTopbar onAbrirMenu={() => setIsSidebarOpen(true)} />
+            <div className="content-col">
+              {/* Cabeçalho visível em ecrãs móveis */}
+              <MobileTopbar onAbrirMenu={() => setIsSidebarOpen(true)} />
 
-            {/* Exibição direta da sua página única */}
-            <main className="main">
-              <DriversPage />
-            </main>
+              {/* Exibição direta da sua página única */}
+              <main className="main">
+                <DriversPage />
+              </main>
+            </div>
           </div>
-        </div>
-      </ImportManifestoProvider>
-    </ProfileProvider>
+        </ImportManifestoProvider>
+      </ProfileProvider>
+    </ThemeProvider>
   );
 }

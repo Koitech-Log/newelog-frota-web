@@ -1,5 +1,5 @@
 :root {
-  /* ==================== CORES ==================== */
+  /* ==================== CORES (TEMA CLARO) ==================== */
   --surface-0: #ffffff;
   --surface-1: #f5f7fb;
   --surface-2: #ebeef5;
@@ -32,6 +32,9 @@
 
   --red: #d93a3f;
   --red-soft: rgba(217, 58, 63, 0.1);
+  --red-border: rgba(217, 58, 63, 0.3);
+
+  --star: #f5b301;
 
   /* ==================== TEXTOS ==================== */
   --ink: #171b21;
@@ -57,10 +60,80 @@
     0 4px 10px rgba(23, 27, 33, 0.07),
     0 20px 38px -16px rgba(23, 27, 33, 0.16);
 
+  --shadow-pop:
+    0 8px 16px rgba(23, 27, 33, 0.08),
+    0 30px 60px -20px rgba(23, 27, 33, 0.22);
+
+  /* Sombra própria dos cartões/superfícies elevadas — muda de peso no escuro */
+  --shadow-scrim: rgba(10, 14, 20, 0.45);
+
   /* ==================== TRANSIÇÕES ==================== */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --transition-fast: 0.15s var(--ease-out);
   --transition-normal: 0.25s var(--ease-out);
+  --transition-theme: 0.35s var(--ease-out);
+}
+
+/* ==================== TEMA ESCURO ====================
+   Ativado via [data-theme="dark"] na raiz do documento
+   (ver ThemeContext). Mantém a mesma paleta de acento (azul),
+   ajustando apenas superfícies, linhas e textos para contraste
+   confortável em fundo escuro. */
+:root[data-theme="dark"] {
+  --surface-0: #171b21;
+  --surface-1: #101318;
+  --surface-2: #1f2530;
+  --surface-3: #2a3140;
+
+  --line-faint: #262c38;
+  --line: #333b4a;
+
+  --brand: #4d7bff;
+  --brand-bright: #6f96ff;
+  --brand-dim: #a9c0ff;
+  --brand-soft: rgba(77, 123, 255, 0.16);
+
+  --amber: #4d7bff;
+  --amber-bright: #6f96ff;
+  --amber-dim: #a9c0ff;
+  --amber-soft: rgba(77, 123, 255, 0.16);
+
+  --asphalt-900: var(--surface-1);
+  --asphalt-800: var(--surface-0);
+  --asphalt-700: var(--surface-2);
+  --asphalt-600: var(--surface-3);
+
+  --cyan: #5cc4ff;
+  --cyan-soft: rgba(92, 196, 255, 0.16);
+
+  --green: #3ecf7e;
+  --green-soft: rgba(62, 207, 126, 0.14);
+
+  --red: #ff6b6e;
+  --red-soft: rgba(255, 107, 110, 0.14);
+  --red-border: rgba(255, 107, 110, 0.35);
+
+  --star: #ffc93c;
+
+  --ink: #eef1f7;
+  --ink-dim: #a7afbf;
+  --ink-faint: #6c7788;
+
+  --shadow-card:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 10px 24px -14px rgba(0, 0, 0, 0.55);
+
+  --shadow-hover:
+    0 4px 10px rgba(0, 0, 0, 0.4),
+    0 20px 38px -16px rgba(0, 0, 0, 0.6);
+
+  --shadow-pop:
+    0 8px 16px rgba(0, 0, 0, 0.4),
+    0 30px 60px -20px rgba(0, 0, 0, 0.65);
+
+  --shadow-scrim: rgba(0, 0, 0, 0.65);
+
+  color-scheme: dark;
 }
 
 /* ==================== RESET ==================== */
@@ -87,6 +160,12 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background var(--transition-theme), color var(--transition-theme);
+}
+
+::selection {
+  background: var(--brand);
+  color: #ffffff;
 }
 
 button,
@@ -151,6 +230,7 @@ svg {
   top: 0;
   z-index: 45;
   width: 100%;
+  transition: background var(--transition-theme), border-color var(--transition-theme);
 }
 
 .burger {
@@ -169,7 +249,7 @@ svg {
 }
 
 .burger:hover {
-  background: rgba(23, 27, 33, 0.045);
+  background: var(--brand-soft);
 }
 
 .mobile-brand {
@@ -199,6 +279,11 @@ svg {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.mobile-import-btn:hover {
+  background: var(--brand-soft);
 }
 
 .topbar-spacer {
@@ -250,4 +335,15 @@ svg {
 
 *::-webkit-scrollbar-thumb:hover {
   background: var(--brand);
+}
+
+/* ============ TRANSIÇÃO DE TEMA ============
+   Aplicada momentaneamente à raiz pelo ThemeToggle enquanto o tema muda,
+   suavizando cor/fundo/borda de toda a árvore sem interferir nas
+   animações próprias de cada componente (que definem sua própria
+   `transition` e não são afetadas por esta regra genérica). */
+.theme-transitioning,
+.theme-transitioning * {
+  transition: background-color var(--transition-theme), border-color var(--transition-theme),
+    color var(--transition-theme), box-shadow var(--transition-theme) !important;
 }

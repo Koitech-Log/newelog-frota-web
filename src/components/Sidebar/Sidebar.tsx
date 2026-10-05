@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../icons";
 import { useProfile } from "../../context/ProfileContext";
 import { useImportManifesto } from "../../context/ImportManifestoContext";
+import { ThemeToggle } from "../ThemeToggle";
 import styles from "./Sidebar.module.css";
 
 interface SidebarProps {
@@ -159,6 +160,8 @@ export function Sidebar({ isOpen, onClose, motoristasCount = 0, frotaCount = 0 }
               </button>
             </div>
           </div>
+
+          <ThemeToggle />
 
           <div className={styles.statusPill}>
             <span className={styles.statusDot}></span>

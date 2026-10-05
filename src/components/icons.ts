@@ -50,6 +50,10 @@ import {
   faSackDollar,
   faCoins,
   faStar,
+
+  // ==================== TEMA ====================
+  faSun,
+  faMoon,
 } from "@fortawesome/free-solid-svg-icons";
 
 export const icons = {
@@ -96,6 +100,10 @@ export const icons = {
   money: faSackDollar,
   coins: faCoins,
   star: faStar,
+
+  // Tema
+  sun: faSun,
+  moon: faMoon,
 };
 
 /**

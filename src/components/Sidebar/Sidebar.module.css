@@ -2,8 +2,8 @@
 .sidebar {
   width: 256px;
   min-width: 256px;
-  background: #ffffff;
-  border-right: 1px solid #e2e6ef;
+  background: var(--surface-0);
+  border-right: 1px solid var(--line-faint);
   padding: 24px 0;
   display: flex;
   flex-direction: column;
@@ -11,7 +11,8 @@
   top: 0;
   height: 100vh;
   z-index: 50;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
+  transition: background var(--transition-theme), border-color var(--transition-theme);
 }
 
 /* ============ MOBILE SIDEBAR ============ */
@@ -42,15 +43,16 @@
   align-items: center;
   gap: 12px;
   padding: 0 20px 22px;
-  border-bottom: 1px solid #e2e6ef;
+  border-bottom: 1px solid var(--line-faint);
   margin-bottom: 18px;
+  transition: border-color var(--transition-theme);
 }
 
 .brandMark {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: #1f4af4;
+  background: linear-gradient(155deg, var(--brand-bright), var(--brand));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,6 +60,7 @@
   font-size: 19px;
   flex-shrink: 0;
   box-shadow: 0 8px 18px -4px rgba(31, 74, 244, 0.45);
+  transition: box-shadow var(--transition-theme);
 }
 
 .brandText {
@@ -66,17 +69,17 @@
 }
 
 .n1 {
-  font-family: 'Oswald', sans-serif;
+  font-family: var(--font-display);
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.8px;
-  color: #171b21;
+  color: var(--ink);
   line-height: 1.1;
 }
 
 .n2 {
   font-size: 9.5px;
-  color: #8a93a3;
+  color: var(--ink-faint);
   letter-spacing: 1.5px;
   text-transform: uppercase;
   font-weight: 600;
@@ -88,7 +91,7 @@
   font-size: 10px;
   letter-spacing: 1.8px;
   text-transform: uppercase;
-  color: #8a93a3;
+  color: var(--ink-faint);
   font-weight: 700;
   padding: 0 22px;
   margin: 10px 0 8px;
@@ -99,7 +102,7 @@
   align-items: center;
   gap: 14px;
   padding: 10px 22px;
-  color: #3b424e;
+  color: var(--ink-dim);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -109,35 +112,37 @@
   background: transparent;
   width: 100%;
   text-align: left;
-  transition: all 0.15s ease;
+  font-family: var(--font-body);
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .navlink svg {
   width: 17px;
   height: 17px;
-  color: #6b7788;
-  transition: color 0.15s ease;
+  color: var(--ink-faint);
+  transition: color 0.15s ease, transform 0.15s var(--ease-out);
   flex-shrink: 0;
 }
 
 .navlink:hover {
-  background: rgba(31, 74, 244, 0.04);
-  color: #171b21;
+  background: var(--brand-soft);
+  color: var(--ink);
 }
 
 .navlink:hover svg {
-  color: #1f4af4;
+  color: var(--brand);
+  transform: translateX(1px);
 }
 
 /* ============ ITEM ATIVO (IGUAL PROTÓTIPO) ============ */
 .navlink.active {
-  color: #171b21 !important;
-  background: #edf2ff !important;
+  color: var(--ink) !important;
+  background: var(--brand-soft) !important;
   font-weight: 600;
 }
 
 .navlink.active svg {
-  color: #1f4af4 !important;
+  color: var(--brand) !important;
 }
 
 .navlink.active::before {
@@ -147,36 +152,38 @@
   top: 4px;
   bottom: 4px;
   width: 4px;
-  background: #1f4af4;
+  background: var(--brand);
   border-radius: 0 4px 4px 0;
 }
 
 /* ============ COUNT BADGE ============ */
 .count {
   margin-left: auto;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
-  color: #64748b;
-  background: #e9eef7;
+  color: var(--ink-dim);
+  background: var(--surface-2);
   padding: 2px 7px;
   border-radius: 12px;
+  transition: background var(--transition-theme), color var(--transition-theme);
 }
 
 /* ============ SIDEBAR FOOTER ============ */
 .sidebarFoot {
   margin-top: auto;
   padding: 16px 20px 0;
-  border-top: 1px solid #e2e6ef;
+  border-top: 1px solid var(--line-faint);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+  transition: border-color var(--transition-theme);
 }
 
 /* ============ PROFILE SWITCH ============ */
 .profileSwitchLabel {
   font-size: 10px;
-  color: #8a93a3;
+  color: var(--ink-faint);
   text-transform: uppercase;
   letter-spacing: 1.2px;
   font-weight: 600;
@@ -186,11 +193,12 @@
 
 .profileToggle {
   display: flex;
-  background: #f4f6fb;
-  border: 1px solid #e2e6ef;
+  background: var(--surface-1);
+  border: 1px solid var(--line-faint);
   border-radius: 12px;
   padding: 4px;
   gap: 4px;
+  transition: background var(--transition-theme), border-color var(--transition-theme);
 }
 
 .profileBtn {
@@ -201,13 +209,14 @@
   gap: 7px;
   background: transparent;
   border: none;
-  color: #5b6472;
+  color: var(--ink-dim);
   font-size: 12.5px;
   font-weight: 600;
   padding: 8px 6px;
   border-radius: 9px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  font-family: var(--font-body);
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .profileBtn svg {
@@ -215,12 +224,12 @@
 }
 
 .profileBtn:hover {
-  color: #171b21;
+  color: var(--ink);
 }
 
-/* Gestor Ativo em Azul Vivo */
+/* Gestor/Operador Ativo em Azul Vivo */
 .profileBtn.profileActive {
-  background: #1f4af4 !important;
+  background: var(--brand) !important;
   color: #ffffff !important;
   box-shadow: 0 2px 8px rgba(31, 74, 244, 0.35);
 }
@@ -235,7 +244,7 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: #6b7788;
+  color: var(--ink-dim);
   padding-top: 2px;
 }
 
@@ -243,9 +252,26 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #1e9e5a;
+  background: var(--green);
   box-shadow: 0 0 6px rgba(30, 158, 90, 0.4);
   flex-shrink: 0;
+  animation: statusPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(30, 158, 90, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(30, 158, 90, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .statusDot {
+    animation: none;
+  }
 }
 
 /* ============ SCRIM MOBILE ============ */
@@ -253,7 +279,7 @@
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(6, 8, 10, 0.55);
+  background: var(--shadow-scrim);
   backdrop-filter: blur(2px);
   z-index: 60;
   opacity: 0;
