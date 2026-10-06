@@ -1,8 +1,7 @@
 import type { ApiErro } from "../types/motorista";
 
-// Em produção isso viria de uma variável de ambiente (VITE_API_BASE_URL) apontando
-// para o gateway; por ora, sem gateway pronto, aponta direto para o motoristas-service.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
 export class ApiRequestError extends Error {
   status: number;
@@ -14,31 +13,50 @@ export class ApiRequestError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const headers = new Headers(init.headers);
+
+  if (init.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...init,
+    headers,
   });
 
   if (!response.ok) {
     let mensagem = `Erro ${response.status} ao chamar ${path}`;
+
     try {
       const corpo = (await response.json()) as ApiErro;
-      if (corpo.mensagem) mensagem = corpo.mensagem;
+
+      if (corpo.mensagem) {
+        mensagem = corpo.mensagem;
+      }
     } catch {
-      // corpo de erro não veio em JSON — mantém a mensagem genérica
+      // mantém a mensagem genérica
     }
+
     throw new ApiRequestError(response.status, mensagem);
   }
 
-  // PATCH/DELETE podem responder 204 sem corpo
-  if (response.status === 204) return undefined as T;
+  if (response.status === 204) {
+    return undefined as T;
+  }
 
   return (await response.json()) as T;
 }
 
 export const apiClient = {
-  get: <T>(path: string) => request<T>(path, { method: "GET" }),
+  get: <T>(path: string) =>
+    request<T>(path, {
+      method: "GET",
+    }),
+
   patch: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: "PATCH", body: JSON.stringify(body) }),
+    request<T>(path, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
 };
