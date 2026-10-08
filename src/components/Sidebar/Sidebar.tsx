@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../icons";
 import { useProfile } from "../../context/ProfileContext";
+import { useAuth } from "../../context/AuthContext";
 import { useImportManifesto } from "../../context/ImportManifestoContext";
 import { ThemeToggle } from "../ThemeToggle";
 import styles from "./Sidebar.module.css";
@@ -16,7 +17,8 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose, motoristasCount = 0, frotaCount = 0 }: SidebarProps) {
   // Mantém 'drivers' selecionado por defeito
   const [activeTab, setActiveTab] = useState<string>("drivers");
-  const { perfil, setPerfil } = useProfile();
+  const { perfil } = useProfile();
+  const { sessao, signOut } = useAuth();
   const { abrirModal } = useImportManifesto();
 
   const handleNavClick = (tabKey: string) => {
@@ -129,36 +131,25 @@ export function Sidebar({ isOpen, onClose, motoristasCount = 0, frotaCount = 0 }
 
         {/* ==================== RODAPÉ ==================== */}
         <div className={styles.sidebarFoot}>
-          <div className={styles.profileSwitch}>
-            <span className={styles.profileSwitchLabel}>Visualizando como</span>
-
-            <div
-              className={styles.profileToggle}
-              role="radiogroup"
-              aria-label="Perfil de visualização"
-            >
-              <button
-                className={`${styles.profileBtn} ${perfil === "gestor" ? styles.profileActive : ""}`}
-                type="button"
-                role="radio"
-                aria-checked={perfil === "gestor"}
-                onClick={() => setPerfil("gestor")}
-              >
-                <FontAwesomeIcon icon={icons.userTie} />
-                <span>Gestor</span>
-              </button>
-
-              <button
-                className={`${styles.profileBtn} ${perfil === "operador" ? styles.profileActive : ""}`}
-                type="button"
-                role="radio"
-                aria-checked={perfil === "operador"}
-                onClick={() => setPerfil("operador")}
-              >
-                <FontAwesomeIcon icon={icons.userGear} />
-                <span>Operador</span>
-              </button>
+          <div className={styles.userBox}>
+            <div className={styles.userAvatar} aria-hidden="true">
+              <FontAwesomeIcon icon={perfil === "gestor" ? icons.userTie : icons.userGear} />
             </div>
+
+            <div className={styles.userInfo}>
+              <span className={styles.userName}>{sessao?.nome}</span>
+              <span className={styles.userRole}>{perfil === "gestor" ? "Gestor" : "Operador"}</span>
+            </div>
+
+            <button
+              type="button"
+              className={styles.logoutBtn}
+              onClick={signOut}
+              aria-label="Sair"
+              title="Sair"
+            >
+              <FontAwesomeIcon icon={icons.signOut} />
+            </button>
           </div>
 
           <ThemeToggle />

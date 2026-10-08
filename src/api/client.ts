@@ -1,4 +1,5 @@
 import type { ApiErro } from "../types/motorista";
+import { lerToken, notificarSessaoExpirada } from "./session";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
@@ -20,6 +21,11 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers.set("Content-Type", "application/json");
   }
 
+  const token = lerToken();
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers,
@@ -36,6 +42,10 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       }
     } catch {
       // mantém a mensagem genérica
+    }
+
+    if (response.status === 401) {
+      notificarSessaoExpirada();
     }
 
     throw new ApiRequestError(response.status, mensagem);

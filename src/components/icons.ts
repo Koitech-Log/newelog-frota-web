@@ -18,6 +18,12 @@ import {
   faFileExport,
   faCloudArrowUp,
   faShieldHalved,
+  faRightFromBracket,
+  faEye,
+  faEyeSlash,
+  faEnvelope,
+  faLock,
+  faArrowRightToBracket,
 
   // ==================== FROTA / VEÍCULOS ====================
   faTruck,
@@ -41,6 +47,7 @@ import {
   // ==================== STATUS / FEEDBACK ====================
   faCircleCheck,
   faCircleExclamation,
+  faCircleInfo,
   faTriangleExclamation,
   faSpinner,
   faCircle,
@@ -75,6 +82,12 @@ export const icons = {
   fileExport: faFileExport,
   cloudUpload: faCloudArrowUp,
   shield: faShieldHalved,
+  signOut: faRightFromBracket,
+  eye: faEye,
+  eyeSlash: faEyeSlash,
+  mail: faEnvelope,
+  lock: faLock,
+  signIn: faArrowRightToBracket,
 
   // Frota
   truck: faTruck,
@@ -92,6 +105,7 @@ export const icons = {
   success: faCircleCheck,
   error: faCircleExclamation,
   warning: faTriangleExclamation,
+  info: faCircleInfo,
   spinner: faSpinner,
   dot: faCircle,
 
