@@ -10,7 +10,7 @@ const MANIFESTO_SERVICE_URL =
   import.meta.env.VITE_MANIFESTO_SERVICE_URL ?? "http://localhost:8081";
 
 export const manifestoApi = {
-  async importarCsv(arquivo: File): Promise<ManifestoUploadResponse> {
+  async importarCsv(arquivo: File, signal?: AbortSignal): Promise<ManifestoUploadResponse> {
     const formData = new FormData();
     formData.append("file", arquivo);
 
@@ -20,6 +20,7 @@ export const manifestoApi = {
       method: "POST",
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       body: formData,
+      signal,
     });
 
     if (!response.ok) {

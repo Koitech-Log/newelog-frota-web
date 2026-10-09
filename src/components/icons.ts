@@ -51,6 +51,8 @@ import {
   faTriangleExclamation,
   faSpinner,
   faCircle,
+  faFileCsv,
+  faTrashCan,
 
   // ==================== FINANCEIRO / DIVERSOS ====================
   faPhone,
@@ -108,6 +110,8 @@ export const icons = {
   info: faCircleInfo,
   spinner: faSpinner,
   dot: faCircle,
+  fileCsv: faFileCsv,
+  trash: faTrashCan,
 
   // Financeiro & Diversos
   phone: faPhone,
