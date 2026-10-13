@@ -6,14 +6,15 @@ import { DriversPage } from "./pages/DriversPage";
 import { ProfileProvider } from "./context/ProfileContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { useMotoristas } from "./hooks/useMotoristas";
-import { ImportManifestoProvider, useImportManifesto } from "./context/ImportManifestoContext";
+import { ImportManifestoProvider } from "./context/ImportManifestoContext";
+import { ImportCsvProvider, useImportCsv } from "./context/ImportCsvContext";
 
 // Lote grande o suficiente para levantar, com boa confiança, todos os tipos
 // de veículo distintos existentes na base (mesmo critério usado em DriversPage).
 const TAMANHO_LOTE_FROTA = 500;
 
 function MobileTopbar({ onAbrirMenu }: { onAbrirMenu: () => void }) {
-  const { abrirModal } = useImportManifesto();
+  const { abrirEscolha } = useImportCsv();
   const { isEscuro, alternarTema } = useTheme();
 
   const handleAlternarTema = () => {
@@ -48,8 +49,8 @@ function MobileTopbar({ onAbrirMenu }: { onAbrirMenu: () => void }) {
         <button
           type="button"
           className="mobile-import-btn"
-          aria-label="Importar manifesto (CSV)"
-          onClick={abrirModal}
+          aria-label="Importar CSV"
+          onClick={abrirEscolha}
         >
           <FontAwesomeIcon icon={icons.fileImport} />
         </button>
@@ -80,26 +81,28 @@ export function App() {
     <ThemeProvider>
       <ProfileProvider>
         <ImportManifestoProvider>
-          <div className="app">
-            <Sidebar
-              isOpen={isSidebarOpen}
-              onClose={() => setIsSidebarOpen(false)}
-              motoristasCount={motoristasCount}
-              frotaCount={frotaCount}
-            />
+          <ImportCsvProvider>
+            <div className="app">
+              <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                motoristasCount={motoristasCount}
+                frotaCount={frotaCount}
+              />
 
-            <div className="content-col">
-              {/* Cabeçalho visível em ecrãs móveis */}
-              <MobileTopbar onAbrirMenu={() => setIsSidebarOpen(true)} />
+              <div className="content-col">
+                {/* Cabeçalho visível em ecrãs móveis */}
+                <MobileTopbar onAbrirMenu={() => setIsSidebarOpen(true)} />
 
-              {/* Exibição direta da sua página única */}
-              <main className="main">
-                <DriversPage />
-              </main>
+                {/* Exibição direta da sua página única */}
+                <main className="main">
+                  <DriversPage />
+                </main>
+              </div>
             </div>
-          </div>
+          </ImportCsvProvider>
         </ImportManifestoProvider>
       </ProfileProvider>
-    </ThemeProvider>
+    </ThemeProvider >
   );
 }

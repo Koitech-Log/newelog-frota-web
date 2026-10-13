@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../icons";
 import { useProfile } from "../../context/ProfileContext";
-import { useImportManifesto } from "../../context/ImportManifestoContext";
+import { useImportCsv } from "../../context/ImportCsvContext";
 import { ThemeToggle } from "../ThemeToggle";
 import styles from "./Sidebar.module.css";
 
@@ -17,7 +17,7 @@ export function Sidebar({ isOpen, onClose, motoristasCount = 0, frotaCount = 0 }
   // Mantém 'drivers' selecionado por defeito
   const [activeTab, setActiveTab] = useState<string>("drivers");
   const { perfil, setPerfil } = useProfile();
-  const { abrirModal } = useImportManifesto();
+  const { abrirEscolha } = useImportCsv();
 
   const handleNavClick = (tabKey: string) => {
     // Se clicar em motoristas, apenas fecha o menu no telemóvel
@@ -30,7 +30,7 @@ export function Sidebar({ isOpen, onClose, motoristasCount = 0, frotaCount = 0 }
     }
 
     if (tabKey === "import") {
-      abrirModal();
+      abrirEscolha();
       if (window.innerWidth <= 900) {
         onClose();
       }
