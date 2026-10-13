@@ -1,0 +1,84 @@
+.arquivoRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: var(--surface-1);
+    border: 1px solid var(--line-faint);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--ink);
+    word-break: break-all;
+}
+
+.arquivoRow svg {
+    color: var(--brand);
+    flex-shrink: 0;
+}
+
+.modeloLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--brand);
+    text-decoration: none;
+}
+
+.modeloLink:hover {
+    text-decoration: underline;
+}
+
+.enviarBtn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    background: var(--brand);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s ease;
+}
+
+.enviarBtn:hover:not(:disabled) {
+    background: var(--brand-bright);
+}
+
+.enviarBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.resumo {
+    margin-top: 16px;
+    font-size: 12.5px;
+    color: var(--ink-dim);
+}
+
+.listaErros {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.listaErros li {
+    font-size: 12px;
+    background: var(--red-soft);
+    color: var(--red);
+    border-radius: 7px;
+    padding: 7px 10px;
+}
