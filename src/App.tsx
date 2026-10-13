@@ -3,7 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "./components/icons";
 import { Sidebar } from "./components/Sidebar";
 import { DriversPage } from "./pages/DriversPage";
-import { ProfileProvider } from "./context/ProfileContext";
+import { DashboardPage } from "./pages/DashboardPage";
+import { ProfileProvider, useProfile } from "./context/ProfileContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
@@ -17,7 +18,6 @@ const TAMANHO_LOTE_FROTA = 500;
 function MobileTopbar({ onAbrirMenu }: { onAbrirMenu: () => void }) {
   const { abrirModal } = useImportManifesto();
   const { isEscuro, alternarTema } = useTheme();
-
   const handleAlternarTema = () => {
     document.documentElement.classList.add("theme-transitioning");
     alternarTema();
@@ -62,6 +62,8 @@ function MobileTopbar({ onAbrirMenu }: { onAbrirMenu: () => void }) {
 
 /** Área logada: só monta (e só chama os serviços) depois do login. */
 function AppLogado() {
+  const { podeVerFinanceiro } = useProfile();
+  const [paginaAtiva, setPaginaAtiva] = useState<"home" | "drivers">("drivers");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { totalElementos: motoristasCount } = useMotoristas({ page: 0, size: 1 });
 
@@ -86,15 +88,21 @@ function AppLogado() {
         onClose={() => setIsSidebarOpen(false)}
         motoristasCount={motoristasCount}
         frotaCount={frotaCount}
+        activeTab={paginaAtiva}
+        onNavigate={setPaginaAtiva}
       />
 
       <div className="content-col">
         {/* Cabeçalho visível em ecrãs móveis */}
         <MobileTopbar onAbrirMenu={() => setIsSidebarOpen(true)} />
 
-        {/* Exibição direta da sua página única */}
+        {/* Exibição da página selecionada */}
         <main className="main">
-          <DriversPage />
+          {paginaAtiva === "home" && podeVerFinanceiro ? (
+            <DashboardPage />
+          ) : (
+            <DriversPage />
+          )}
         </main>
       </div>
     </div>

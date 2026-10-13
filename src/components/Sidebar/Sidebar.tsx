@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../icons";
 import { useProfile } from "../../context/ProfileContext";
@@ -12,22 +11,34 @@ interface SidebarProps {
   onClose: () => void;
   motoristasCount?: number;
   frotaCount?: number;
+  activeTab: "home" | "drivers";
+  onNavigate: (pagina: "home" | "drivers") => void;
 }
 
-export function Sidebar({ isOpen, onClose, motoristasCount = 0, frotaCount = 0 }: SidebarProps) {
-  // Mantém 'drivers' selecionado por defeito
-  const [activeTab, setActiveTab] = useState<string>("drivers");
-  const { perfil } = useProfile();
+export function Sidebar({
+  isOpen,
+  onClose,
+  motoristasCount = 0,
+  frotaCount = 0,
+  activeTab,
+  onNavigate,
+}: SidebarProps) {
+  const { perfil, podeVerFinanceiro } = useProfile();
   const { sessao, signOut } = useAuth();
   const { abrirModal } = useImportManifesto();
 
   const handleNavClick = (tabKey: string) => {
-    // Se clicar em motoristas, apenas fecha o menu no telemóvel
-    if (tabKey === "drivers") {
-      setActiveTab("drivers");
+    if (tabKey === "home" || tabKey === "drivers") {
+      if (tabKey === "home" && !podeVerFinanceiro) {
+        return;
+      }
+
+      onNavigate(tabKey);
+
       if (window.innerWidth <= 900) {
         onClose();
       }
+
       return;
     }
 
@@ -68,17 +79,19 @@ export function Sidebar({ isOpen, onClose, motoristasCount = 0, frotaCount = 0 }
         <nav aria-label="Navegação principal">
           <div className={styles.navGroupLabel}>Painel</div>
 
-          <button
-            className={`${styles.navlink} ${activeTab === "home" ? styles.active : ""}`}
-            type="button"
-            onClick={() => handleNavClick("home")}
-          >
-            <FontAwesomeIcon icon={icons.gauge} />
-            <span>Visão geral</span>
-          </button>
+          {podeVerFinanceiro && (
+            <button
+              className={`${styles.navlink} ${activeTab === "home" ? styles.active : ""}`}
+              type="button"
+              onClick={() => handleNavClick("home")}
+            >
+              <FontAwesomeIcon icon={icons.gauge} />
+              <span>Visão geral</span>
+            </button>
+          )}
 
           <button
-            className={`${styles.navlink} ${activeTab === "fleet" ? styles.active : ""}`}
+            className={styles.navlink}
             type="button"
             onClick={() => handleNavClick("fleet")}
           >
@@ -99,7 +112,7 @@ export function Sidebar({ isOpen, onClose, motoristasCount = 0, frotaCount = 0 }
           </button>
 
           <button
-            className={`${styles.navlink} ${activeTab === "rank" ? styles.active : ""}`}
+            className={styles.navlink}
             type="button"
             onClick={() => handleNavClick("rank")}
           >
