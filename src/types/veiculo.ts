@@ -7,7 +7,8 @@ export interface VeiculoUploadResponse {
     mensagem: string;
     nomeArquivo: string;
     totalLinhas: number;
-    totalCadastrados: number;
-    totalRejeitados: number;
+    cadastrados: number;
+    atualizados: number;
+    rejeitados: number;
     erros: ErroLinhaVeiculo[];
 }

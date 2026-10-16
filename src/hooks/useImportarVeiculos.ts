@@ -35,7 +35,7 @@ export function useImportarVeiculos() {
         try {
             const resultado = await veiculosApi.importarCsv(arquivo);
             setDados({
-                estado: resultado.totalRejeitados > 0 ? "atencao" : "sucesso",
+                estado: resultado.rejeitados > 0 ? "atencao" : "sucesso",
                 resultado,
                 mensagemErro: null,
             });

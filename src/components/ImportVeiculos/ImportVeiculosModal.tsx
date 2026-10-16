@@ -133,26 +133,26 @@ export function ImportVeiculosModal({ aberto, onClose }: ImportVeiculosModalProp
                     {concluido && resultado && (
                         <>
                             <div
-                                className={`${base.status} ${resultado.totalCadastrados > 0 ? base.success : base.error
+                                className={`${base.status} ${resultado.cadastrados > 0 ? base.success : base.error
                                     }`}
                             >
                                 <FontAwesomeIcon
-                                    icon={resultado.totalCadastrados > 0 ? icons.success : icons.error}
+                                    icon={resultado.cadastrados > 0 ? icons.success : icons.error}
                                 />
                                 <span>
-                                    {resultado.totalCadastrados} veículo
-                                    {resultado.totalCadastrados !== 1 ? "s" : ""} cadastrado
-                                    {resultado.totalCadastrados !== 1 ? "s" : ""} de {resultado.totalLinhas}{" "}
+                                    {resultado.cadastrados} veículo
+                                    {resultado.cadastrados !== 1 ? "s" : ""} cadastrado
+                                    {resultado.cadastrados !== 1 ? "s" : ""} de {resultado.totalLinhas}{" "}
                                     linha{resultado.totalLinhas !== 1 ? "s" : ""}.
                                 </span>
                             </div>
 
-                            {resultado.totalRejeitados > 0 && (
+                            {resultado.rejeitados > 0 && (
                                 <>
                                     <p className={styles.resumo}>
-                                        {resultado.totalRejeitados} linha
-                                        {resultado.totalRejeitados !== 1 ? "s" : ""} rejeitada
-                                        {resultado.totalRejeitados !== 1 ? "s" : ""}:
+                                        {resultado.rejeitados} linha
+                                        {resultado.rejeitados !== 1 ? "s" : ""} rejeitada
+                                        {resultado.rejeitados !== 1 ? "s" : ""}:
                                     </p>
                                     <ul className={styles.listaErros}>
                                         {resultado.erros.map((erro) => (

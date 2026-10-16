@@ -2,15 +2,15 @@ import { ApiRequestError } from "./client";
 import type { VeiculoUploadResponse } from "../types/veiculo";
 import type { ApiErro } from "../types/motorista";
 
-const VEICULOS_SERVICE_URL =
-    import.meta.env.VITE_VEICULOS_SERVICE_URL ?? "http://localhost:8081";
+const MANIFESTO_SERVICE_URL =
+    import.meta.env.VITE_MANIFESTO_SERVICE_URL ?? "http://localhost:8081";
 
 export const veiculosApi = {
     async importarCsv(arquivo: File): Promise<VeiculoUploadResponse> {
         const formData = new FormData();
         formData.append("file", arquivo);
 
-        const response = await fetch(`${VEICULOS_SERVICE_URL}/veiculos/upload`, {
+        const response = await fetch(`${MANIFESTO_SERVICE_URL}/veiculos/upload`, {
             method: "POST",
             body: formData,
         });
