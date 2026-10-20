@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import {
-  buscarDashboard,
-  type DashboardResponse,
+  buscarRentabilidadeMedia,
+  type RentabilidadeMediaResponse,
 } from "../api/dashboard";
 import { useImportManifesto } from "../context/ImportManifestoContext";
 import styles from "./DashboardPage.module.css";
+import { RentabilidadeMedia } from "../components/RentabilidadeMedia";
 
 const formatadorMoeda = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -21,7 +22,8 @@ export function DashboardPage() {
     };
   });
 
-  const [dados, setDados] = useState<DashboardResponse | null>(null);
+  const [resumo, setDados] = useState<RentabilidadeMediaResponse | null>(null);
+  const dados = resumo?.geral;
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [atualizacao, setAtualizacao] = useState(0);
@@ -36,7 +38,7 @@ export function DashboardPage() {
       setErro(null);
 
       try {
-        const resposta = await buscarDashboard(periodo.ano, periodo.mes);
+        const resposta = await buscarRentabilidadeMedia(periodo.ano, periodo.mes);
 
         if (!cancelado) {
           setDados(resposta);
@@ -210,6 +212,8 @@ export function DashboardPage() {
               </p>
             </article>
           </div>
+
+          {resumo && <RentabilidadeMedia dados={resumo} />}
 
           <p className={styles.note}>
             Custos = pedágios.
