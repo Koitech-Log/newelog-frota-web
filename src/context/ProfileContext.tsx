@@ -1,10 +1,9 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 
 export type Perfil = "gestor" | "operador";
 
 interface ProfileContextValue {
   perfil: Perfil;
-  setPerfil: (perfil: Perfil) => void;
   /** true quando o perfil ativo pode ver valores financeiros (frete, pedágio, rentabilidade). */
   podeVerFinanceiro: boolean;
 }
@@ -12,19 +11,15 @@ interface ProfileContextValue {
 const ProfileContext = createContext<ProfileContextValue | null>(null);
 
 /**
- * Replica, em React, a regra que no protótipo HTML era feita via
- * `body.profile-gestor` + CSS `display:none` — aqui a ocultação é por
- * renderização condicional (mais idiomático em React que toggle de classe),
- * mas o efeito visual final é o mesmo: Operador não vê frete, pedágio,
- * rentabilidade nem "Rentab. / viagem".
+ * O perfil vem do token emitido pelo auth-service (não é mais escolhido na
+ * Sidebar). Operador não vê frete, pedágio, rentabilidade nem "Rentab. / viagem".
+ *
+ * Atenção: esta é uma regra de exibição. Os serviços ainda devolvem os valores
+ * financeiros para qualquer usuário autenticado.
  */
-export function ProfileProvider({ children }: { children: ReactNode }) {
-  const [perfil, setPerfil] = useState<Perfil>("gestor");
-
+export function ProfileProvider({ perfil, children }: { perfil: Perfil; children: ReactNode }) {
   return (
-    <ProfileContext.Provider
-      value={{ perfil, setPerfil, podeVerFinanceiro: perfil === "gestor" }}
-    >
+    <ProfileContext.Provider value={{ perfil, podeVerFinanceiro: perfil === "gestor" }}>
       {children}
     </ProfileContext.Provider>
   );

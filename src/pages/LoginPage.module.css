@@ -1,0 +1,552 @@
+/* Usa os tokens globais do index.css (claro/escuro via data-theme). */
+.page {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--surface-1);
+}
+
+/* ==================== PAINEL DA MARCA ====================
+   Um único momento de movimento: o caminhão percorre a rota
+   (Origem → Manifesto → Destino) ao carregar e volta a rodar
+   enquanto o login é processado. */
+.brand {
+  --c: 13px; /* centro vertical do marcador de cada parada */
+  --sh: 48px; /* altura de cada parada */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 48px;
+  background: #0f1830;
+  color: #fff;
+  overflow: hidden;
+}
+.logo {
+  width: auto;
+  height: 38px;
+  align-self: flex-start;
+}
+
+.route {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+  padding-left: 36px;
+  margin: auto 0;
+}
+/* trilho tracejado */
+.route::before,
+.route::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  left: 7px;
+  top: var(--c);
+  bottom: calc(var(--sh) - var(--c));
+  width: 3px;
+}
+.route::before {
+  background: repeating-linear-gradient(rgba(111, 150, 255, 0.35) 0 12px, transparent 12px 20px);
+  animation: fade 0.6s ease both;
+}
+/* trecho já percorrido */
+.route::after {
+  border-radius: 2px;
+  background: var(--brand-bright);
+  transform-origin: top;
+  animation: draw 2.6s linear 0.5s backwards;
+}
+
+.stop {
+  --lit-delay: 0.5s;
+  position: relative;
+  z-index: 1;
+  height: var(--sh);
+  animation: arrive 0.4s ease var(--lit-delay) backwards;
+}
+.stop:nth-child(2) {
+  --lit-delay: 1.8s;
+}
+.stop:nth-child(3) {
+  --lit-delay: 3.1s;
+}
+.stop strong {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: calc(var(--c) * 2);
+}
+.stop span {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.9rem;
+  line-height: 20px;
+  color: #9fb0c9;
+}
+.stop::before {
+  content: '';
+  position: absolute;
+  left: -36px;
+  top: calc(var(--c) - 8.5px);
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--brand-bright);
+  border: 3px solid var(--brand-bright);
+  animation: lit 0.45s ease var(--lit-delay) backwards;
+}
+
+.truck {
+  position: absolute;
+  z-index: 2;
+  left: 8.5px;
+  top: calc(100% - var(--sh) + var(--c));
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-size: 13px;
+  box-shadow: 0 0 0 5px rgba(61, 99, 255, 0.25);
+  animation: drive 2.6s linear 0.5s backwards;
+}
+/* depois do primeiro envio o caminhão fica no destino... */
+.page[data-ran='true'] .truck {
+  animation: none;
+}
+/* ...e só volta a rodar enquanto o login é processado */
+.page[data-ran='true'][data-loading='true'] .truck {
+  animation: driveLoop 1.8s linear infinite;
+}
+
+.foot {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.tagline {
+  max-width: 30ch;
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: #c4d1da;
+}
+.copy {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #8394ad;
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+}
+@keyframes draw {
+  from { transform: scaleY(0); }
+}
+@keyframes drive {
+  from { top: var(--c); }
+}
+@keyframes driveLoop {
+  from { top: var(--c); }
+  to { top: calc(100% - var(--sh) + var(--c)); }
+}
+@keyframes arrive {
+  from { opacity: 0.4; }
+}
+@keyframes lit {
+  from { background: #0f1830; transform: scale(0.8); }
+  55% { transform: scale(1.3); }
+}
+
+/* ==================== PAINEL DO FORMULÁRIO ==================== */
+.panel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 72px 24px 40px;
+}
+.theme {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+}
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface-0);
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  animation: rise 0.5s var(--ease-out) 0.1s backwards;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+/* barra de progresso indeterminada, só enquanto entra */
+.bar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.bar[data-active='true'] {
+  opacity: 1;
+}
+.bar::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  border-radius: 3px;
+  background: var(--brand);
+  animation: slide 1.1s ease-in-out infinite;
+}
+@keyframes slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 36px 32px 28px;
+}
+.shake {
+  animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+.subtitle {
+  margin: 0;
+  color: var(--ink-dim);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.control {
+  position: relative;
+}
+.lead {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  margin-top: -8px;
+  color: var(--ink-faint);
+  pointer-events: none;
+  transition: color 0.15s;
+}
+.control:focus-within .lead {
+  color: var(--brand);
+}
+.control[data-invalid='true'] .lead {
+  color: var(--red);
+}
+.valid {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  margin-top: -8px;
+  color: var(--green);
+  pointer-events: none;
+  animation: pop 0.3s var(--ease-out);
+}
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.5); }
+}
+
+.field input[type='email'],
+.field input[type='password'],
+.field input[type='text'] {
+  width: 100%;
+  box-sizing: border-box;
+  height: 46px;
+  padding: 0 44px 0 42px;
+  font: inherit;
+  color: inherit;
+  background: var(--surface-0);
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field input::placeholder {
+  color: var(--ink-faint);
+}
+.field input[aria-invalid='true'] {
+  border-color: var(--red);
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px var(--brand-soft);
+}
+.field input[aria-invalid='true']:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 4px var(--red-soft);
+}
+.field input[readonly] {
+  opacity: 0.75;
+}
+.eye:focus-visible,
+.submit:focus-visible,
+.check input:focus-visible {
+  outline: 3px solid var(--brand-bright);
+  outline-offset: 2px;
+}
+.eye {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.eye:hover {
+  color: var(--ink);
+  background: var(--brand-soft);
+}
+
+.error {
+  color: var(--red);
+  font-size: 0.85rem;
+  animation: fade 0.2s ease;
+}
+.caps {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+  animation: fade 0.2s ease;
+}
+.caps svg {
+  color: var(--star);
+}
+
+.alert,
+.notice {
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  animation: fade 0.25s ease;
+}
+.alert {
+  background: var(--red-soft);
+  border: 1px solid var(--red-border);
+  color: var(--red);
+}
+.notice {
+  background: var(--brand-soft);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+}
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand-dim);
+}
+
+.submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 48px;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 700;
+  color: #fff;
+  background: var(--brand);
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+}
+.submit:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+.submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.submit:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+.arrow {
+  transition: transform 0.2s var(--ease-out);
+}
+.submit:hover:not(:disabled) .arrow {
+  transform: translateX(3px);
+}
+
+.help {
+  margin: 0;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--ink-dim);
+}
+.help svg {
+  margin-right: 6px;
+  color: var(--ink-faint);
+}
+
+/* ==================== MOBILE: rota na horizontal ==================== */
+@media (max-width: 800px) {
+  .page {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .brand {
+    gap: 0;
+    padding: 24px 24px 28px;
+  }
+  .route {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    padding: 26px 0 0;
+    margin: 20px 0 0;
+  }
+  .route::before,
+  .route::after {
+    left: calc(100% / 6);
+    right: calc(100% / 6);
+    top: 7px;
+    bottom: auto;
+    width: auto;
+    height: 3px;
+  }
+  .route::before {
+    background: repeating-linear-gradient(90deg, rgba(111, 150, 255, 0.35) 0 12px, transparent 12px 20px);
+  }
+  .route::after {
+    transform-origin: left;
+    animation-name: drawX;
+  }
+  .stop {
+    height: auto;
+    text-align: center;
+  }
+  .stop strong {
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+  .stop span {
+    display: none;
+  }
+  .stop::before {
+    left: 50%;
+    top: -26px;
+    margin-left: -8.5px;
+  }
+  .truck {
+    left: calc(100% * 5 / 6);
+    top: 8.5px;
+    animation-name: driveX;
+  }
+  .page[data-ran='true'][data-loading='true'] .truck {
+    animation-name: driveLoopX;
+  }
+  .foot {
+    display: none;
+  }
+  .panel {
+    padding-top: 64px;
+  }
+  .form {
+    padding: 28px 22px 24px;
+  }
+}
+@keyframes drawX {
+  from { transform: scaleX(0); }
+}
+@keyframes driveX {
+  from { left: calc(100% / 6); }
+}
+@keyframes driveLoopX {
+  from { left: calc(100% / 6); }
+  to { left: calc(100% * 5 / 6); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route::before,
+  .route::after,
+  .stop,
+  .stop::before,
+  .card,
+  .shake,
+  .valid,
+  .error,
+  .caps,
+  .alert,
+  .notice,
+  .truck,
+  .page[data-ran='true'][data-loading='true'] .truck {
+    animation: none;
+  }
+  .bar::before {
+    animation: none;
+    width: 100%;
+    opacity: 0.6;
+  }
+  .submit,
+  .arrow,
+  .field input {
+    transition: none;
+  }
+}

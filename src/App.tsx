@@ -3,7 +3,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "./components/icons";
 import { Sidebar } from "./components/Sidebar";
 import { DriversPage } from "./pages/DriversPage";
-import { ProfileProvider } from "./context/ProfileContext";
+import { DashboardPage } from "./pages/DashboardPage";
+import { ProfileProvider, useProfile } from "./context/ProfileContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { LoginPage } from "./pages/LoginPage";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { useMotoristas } from "./hooks/useMotoristas";
 import { ImportManifestoProvider, useImportManifesto } from "./context/ImportManifestoContext";
@@ -15,7 +18,6 @@ const TAMANHO_LOTE_FROTA = 500;
 function MobileTopbar({ onAbrirMenu }: { onAbrirMenu: () => void }) {
   const { abrirModal } = useImportManifesto();
   const { isEscuro, alternarTema } = useTheme();
-
   const handleAlternarTema = () => {
     document.documentElement.classList.add("theme-transitioning");
     alternarTema();
@@ -58,7 +60,10 @@ function MobileTopbar({ onAbrirMenu }: { onAbrirMenu: () => void }) {
   );
 }
 
-export function App() {
+/** Área logada: só monta (e só chama os serviços) depois do login. */
+function AppLogado() {
+  const { podeVerFinanceiro } = useProfile();
+  const [paginaAtiva, setPaginaAtiva] = useState<"home" | "drivers">("drivers");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { totalElementos: motoristasCount } = useMotoristas({ page: 0, size: 1 });
 
@@ -77,29 +82,54 @@ export function App() {
   }, [motoristasParaFrota]);
 
   return (
+    <div className="app">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        motoristasCount={motoristasCount}
+        frotaCount={frotaCount}
+        activeTab={paginaAtiva}
+        onNavigate={setPaginaAtiva}
+      />
+
+      <div className="content-col">
+        {/* Cabeçalho visível em ecrãs móveis */}
+        <MobileTopbar onAbrirMenu={() => setIsSidebarOpen(true)} />
+
+        {/* Exibição da página selecionada */}
+        <main className="main">
+          {paginaAtiva === "home" && podeVerFinanceiro ? (
+            <DashboardPage />
+          ) : (
+            <DriversPage />
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function Gate() {
+  const { sessao } = useAuth();
+
+  if (!sessao) return <LoginPage />;
+
+  // key: ao trocar de usuário, o estado da área logada recomeça do zero.
+  return (
+    <ProfileProvider key={sessao.token} perfil={sessao.perfil}>
+      <ImportManifestoProvider>
+        <AppLogado />
+      </ImportManifestoProvider>
+    </ProfileProvider>
+  );
+}
+
+export function App() {
+  return (
     <ThemeProvider>
-      <ProfileProvider>
-        <ImportManifestoProvider>
-          <div className="app">
-            <Sidebar
-              isOpen={isSidebarOpen}
-              onClose={() => setIsSidebarOpen(false)}
-              motoristasCount={motoristasCount}
-              frotaCount={frotaCount}
-            />
-
-            <div className="content-col">
-              {/* Cabeçalho visível em ecrãs móveis */}
-              <MobileTopbar onAbrirMenu={() => setIsSidebarOpen(true)} />
-
-              {/* Exibição direta da sua página única */}
-              <main className="main">
-                <DriversPage />
-              </main>
-            </div>
-          </div>
-        </ImportManifestoProvider>
-      </ProfileProvider>
+      <AuthProvider>
+        <Gate />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
