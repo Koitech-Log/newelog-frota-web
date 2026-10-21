@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../icons";
 import { useProfile } from "../../context/ProfileContext";
 import { useAuth } from "../../context/AuthContext";
+import { useImportCsv } from "../../context/ImportCsvContext";
 import { useImportManifesto } from "../../context/ImportManifestoContext";
 import { ThemeToggle } from "../ThemeToggle";
 import styles from "./Sidebar.module.css";
@@ -25,6 +26,7 @@ export function Sidebar({
 }: SidebarProps) {
   const { perfil, podeVerFinanceiro } = useProfile();
   const { sessao, signOut } = useAuth();
+  const { abrirEscolha } = useImportCsv();
   const { abrirModal } = useImportManifesto();
 
   const handleNavClick = (tabKey: string) => {
@@ -43,14 +45,26 @@ export function Sidebar({
     }
 
     if (tabKey === "import") {
-      abrirModal();
+      abrirEscolha();
+
       if (window.innerWidth <= 900) {
         onClose();
       }
+
       return;
     }
 
-    // Para as restantes abas ainda não desenvolvidas
+    if (tabKey === "manifesto") {
+      abrirModal();
+
+      if (window.innerWidth <= 900) {
+        onClose();
+      }
+
+      return;
+    }
+
+    // Para as restantes abas ainda não desenvolvidas.
     console.info(`A página "${tabKey}" ainda não está implementada.`);
   };
 
@@ -62,8 +76,10 @@ export function Sidebar({
         aria-hidden="true"
       />
 
-      <aside className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}>
-        {/* ==================== MARCA ==================== */}
+      <aside
+        className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}
+      >
+        {/* MARCA */}
         <div className={styles.brand}>
           <div className={styles.brandMark}>
             <FontAwesomeIcon icon={icons.truckFast} />
@@ -75,13 +91,15 @@ export function Sidebar({
           </div>
         </div>
 
-        {/* ==================== NAVEGAÇÃO ==================== */}
+        {/* NAVEGAÇÃO */}
         <nav aria-label="Navegação principal">
           <div className={styles.navGroupLabel}>Painel</div>
 
           {podeVerFinanceiro && (
             <button
-              className={`${styles.navlink} ${activeTab === "home" ? styles.active : ""}`}
+              className={`${styles.navlink} ${
+                activeTab === "home" ? styles.active : ""
+              }`}
               type="button"
               onClick={() => handleNavClick("home")}
             >
@@ -100,9 +118,10 @@ export function Sidebar({
             <span className={styles.count}>{frotaCount}</span>
           </button>
 
-          {/* Botão ativo da sua página atual */}
           <button
-            className={`${styles.navlink} ${activeTab === "drivers" ? styles.active : ""}`}
+            className={`${styles.navlink} ${
+              activeTab === "drivers" ? styles.active : ""
+            }`}
             type="button"
             onClick={() => handleNavClick("drivers")}
           >
@@ -120,7 +139,7 @@ export function Sidebar({
             <span>Ranking</span>
           </button>
 
-          {/* ==================== DADOS ==================== */}
+          {/* DADOS */}
           <div className={styles.navGroupLabel}>Dados</div>
 
           <button
@@ -135,6 +154,15 @@ export function Sidebar({
           <button
             className={styles.navlink}
             type="button"
+            onClick={() => handleNavClick("manifesto")}
+          >
+            <FontAwesomeIcon icon={icons.fileImport} />
+            <span>Importar manifesto</span>
+          </button>
+
+          <button
+            className={styles.navlink}
+            type="button"
             onClick={() => handleNavClick("export")}
           >
             <FontAwesomeIcon icon={icons.fileExport} />
@@ -142,16 +170,30 @@ export function Sidebar({
           </button>
         </nav>
 
-        {/* ==================== RODAPÉ ==================== */}
+        {/* RODAPÉ */}
         <div className={styles.sidebarFoot}>
           <div className={styles.userBox}>
-            <div className={styles.userAvatar} aria-hidden="true">
-              <FontAwesomeIcon icon={perfil === "gestor" ? icons.userTie : icons.userGear} />
+            <div
+              className={styles.userAvatar}
+              aria-hidden="true"
+            >
+              <FontAwesomeIcon
+                icon={
+                  perfil === "gestor"
+                    ? icons.userTie
+                    : icons.userGear
+                }
+              />
             </div>
 
             <div className={styles.userInfo}>
-              <span className={styles.userName}>{sessao?.nome}</span>
-              <span className={styles.userRole}>{perfil === "gestor" ? "Gestor" : "Operador"}</span>
+              <span className={styles.userName}>
+                {sessao?.nome}
+              </span>
+
+              <span className={styles.userRole}>
+                {perfil === "gestor" ? "Gestor" : "Operador"}
+              </span>
             </div>
 
             <button
