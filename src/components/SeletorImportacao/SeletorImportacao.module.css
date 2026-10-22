@@ -1,0 +1,51 @@
+.seletor {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  margin-bottom: 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--line-faint);
+  border-radius: 12px;
+}
+
+.opcao {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.opcao:hover:not(:disabled):not(.ativa) {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+.opcao.ativa {
+  background: var(--brand-soft);
+  color: var(--brand);
+  cursor: default;
+}
+
+.opcao:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.opcao:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .opcao {
+    min-height: 44px;
+  }
+}

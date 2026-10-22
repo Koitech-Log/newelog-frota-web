@@ -1,39 +1,64 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../icons";
-import {
-  TAMANHO_MAXIMO_BYTES,
-  useImportarManifesto,
-} from "../../hooks/useImportarManifesto";
-import styles from "./ImportManifestoModal.module.css";
+import { useImportarManifesto } from "../../hooks/useImportarManifesto";
+import { useImportarVeiculos } from "../../hooks/useImportarVeiculos";
+import { TAMANHO_MAXIMO_BYTES, formatarTamanho, plural } from "../../utils/arquivoCsv";
 import { AlertaMotoristasNaoEncontrados } from "../Alert/AlertaMotoristasNaoEncontrados";
+import { SeletorImportacao, type TipoImportacao } from "../SeletorImportacao";
+import styles from "./ImportCsvModal.module.css";
 
-interface ImportManifestoModalProps {
+interface ImportCsvModalProps {
   aberto: boolean;
+  /** Tipo de importação selecionado no seletor do modal. */
+  tipo: TipoImportacao;
+  onTrocarTipo: (tipo: TipoImportacao) => void;
   onClose: () => void;
-  aoImportarComSucesso?: () => void;
+  /** Chamado ao sair do modal depois de importar um manifesto (para recarregar listas). */
+  aoImportarManifesto?: () => void;
 }
+
+/** Textos que mudam conforme o tipo — todo o resto do fluxo é idêntico. */
+const CONFIG: Record<
+  TipoImportacao,
+  { subtitulo: string; dropzone: string; dropzoneTouch: string; aria: string; botao: string; dica: string }
+> = {
+  manifesto: {
+    subtitulo: "Atualize o cadastro de motoristas a partir de um arquivo CSV.",
+    dropzone: "Arraste o CSV do manifesto aqui",
+    dropzoneTouch: "Selecione o CSV do manifesto",
+    aria: "Selecionar arquivo CSV do manifesto",
+    botao: "Importar manifesto",
+    dica:
+      "Motoristas já cadastrados são atualizados automaticamente. Motoristas novos entram no cadastro, mas ficam sinalizados como pendentes de validação.",
+  },
+  veiculos: {
+    subtitulo: "Cadastre vários veículos de uma vez a partir de um arquivo CSV.",
+    dropzone: "Arraste o CSV de veículos aqui",
+    dropzoneTouch: "Selecione o CSV de veículos",
+    aria: "Selecionar arquivo CSV de veículos",
+    botao: "Importar veículos",
+    dica:
+      "Colunas esperadas: Placa, Marca, Modelo, Cor, Tipo Veículo e Agregado. Linhas inválidas ou duplicadas são rejeitadas e listadas no resultado.",
+  },
+};
 
 const FOCAVEIS =
   'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-function formatarTamanho(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1).replace(".", ",")} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1).replace(".", ",")} MB`;
-}
-
-function plural(n: number, singular: string, pluralForm: string) {
-  return n === 1 ? singular : pluralForm;
-}
-
-export function ImportManifestoModal({
+export function ImportCsvModal({
   aberto,
+  tipo,
+  onTrocarTipo,
   onClose,
-  aoImportarComSucesso,
-}: ImportManifestoModalProps) {
-  const { estado, arquivo, resultado, mensagemErro, selecionar, remover, importar, cancelar, reiniciar } =
-    useImportarManifesto();
+  aoImportarManifesto,
+}: ImportCsvModalProps) {
+  const manifesto = useImportarManifesto();
+  const veiculos = useImportarVeiculos();
+  const ativo = tipo === "manifesto" ? manifesto : veiculos;
+  const { estado, arquivo, mensagemErro, selecionar, remover, importar } = ativo;
+  const config = CONFIG[tipo];
+
   const [arrastando, setArrastando] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -45,13 +70,18 @@ export function ImportManifestoModal({
   const concluido = estado === "sucesso" || estado === "atencao";
 
   function handleFechar() {
-    if (concluido) aoImportarComSucesso?.(); // fechar pelo X/Esc também atualiza a lista
-    cancelar();
+    // sair do modal depois de importar um manifesto atualiza as listas
+    if (manifesto.estado === "sucesso" || manifesto.estado === "atencao") aoImportarManifesto?.();
+    manifesto.cancelar();
+    veiculos.cancelar();
     onClose();
     // aguarda a transição de saída antes de limpar, para não "piscar" o
     // conteúdo enquanto o modal ainda está visível fechando
     window.clearTimeout(resetTimerRef.current);
-    resetTimerRef.current = window.setTimeout(reiniciar, 250);
+    resetTimerRef.current = window.setTimeout(() => {
+      manifesto.reiniciar();
+      veiculos.reiniciar();
+    }, 250);
   }
 
   // Abertura: cancela reset pendente, trava o scroll da página, move o foco
@@ -88,11 +118,11 @@ export function ImportManifestoModal({
     }
     const primeiro = itens[0];
     const ultimo = itens[itens.length - 1];
-    const ativo = document.activeElement;
-    if (e.shiftKey && (ativo === primeiro || ativo === modalRef.current)) {
+    const focado = document.activeElement;
+    if (e.shiftKey && (focado === primeiro || focado === modalRef.current)) {
       e.preventDefault();
       ultimo.focus();
-    } else if (!e.shiftKey && ativo === ultimo) {
+    } else if (!e.shiftKey && focado === ultimo) {
       e.preventDefault();
       primeiro.focus();
     }
@@ -110,7 +140,35 @@ export function ImportManifestoModal({
 
   const temArquivoNaFila = !!arquivo && !concluido;
   const mostrarDropzone = !arquivo && !carregando && !concluido;
-  const rejeitados = resultado?.totalRejeitados ?? 0;
+
+  // Resumo normalizado: os dois tipos mostram os mesmos três números.
+  const resumo =
+    tipo === "manifesto"
+      ? manifesto.resultado && {
+          lidas: manifesto.resultado.totalProcessados,
+          importadas: manifesto.resultado.totalCadastrados,
+          rejeitadas: manifesto.resultado.totalRejeitados ?? 0,
+        }
+      : veiculos.resultado && {
+          lidas: veiculos.resultado.totalLinhas,
+          importadas: veiculos.resultado.cadastrados,
+          rejeitadas: veiculos.resultado.rejeitados,
+        };
+
+  // Nada foi importado (ex.: todas as linhas rejeitadas) conta como falha.
+  const nadaImportado = !!resumo && resumo.importadas === 0;
+  const statusSucesso = estado === "sucesso";
+  const statusClasse = nadaImportado ? styles.error : statusSucesso ? styles.success : styles.atencao;
+  const statusIcone = nadaImportado ? icons.error : statusSucesso ? icons.success : icons.warning;
+  const statusTexto = nadaImportado
+    ? "Nenhuma linha foi importada."
+    : statusSucesso
+      ? "Importação concluída."
+      : tipo === "manifesto"
+        ? "Importação concluída — há motoristas novos para validar."
+        : "Importação concluída — algumas linhas foram rejeitadas.";
+
+  const motivoRejeicao = tipo === "manifesto" ? " por CPF/CNPJ inválido" : "";
 
   return (
     <>
@@ -133,10 +191,10 @@ export function ImportManifestoModal({
         <div className={styles.head}>
           <div className={styles.headText}>
             <h3 id={titleId}>
-              <FontAwesomeIcon icon={icons.fileImport} /> Importar manifesto
+              <FontAwesomeIcon icon={icons.fileImport} /> Importar CSV
             </h3>
             <p id={descId} className={styles.subtitle}>
-              Atualize o cadastro de motoristas a partir de um arquivo CSV.
+              {config.subtitulo}
             </p>
           </div>
           <button
@@ -150,13 +208,15 @@ export function ImportManifestoModal({
         </div>
 
         <div className={styles.body}>
+          <SeletorImportacao ativo={tipo} onTrocar={onTrocarTipo} desabilitado={carregando} />
+
           {mostrarDropzone && (
             <>
               <div
                 className={`${styles.dropzone} ${arrastando ? styles.dragover : ""}`}
                 role="button"
                 tabIndex={0}
-                aria-label="Selecionar arquivo CSV do manifesto"
+                aria-label={config.aria}
                 onClick={abrirSeletor}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -184,8 +244,8 @@ export function ImportManifestoModal({
                     "Solte o arquivo para selecionar"
                   ) : (
                     <>
-                      <span className={styles.dzDesktop}>Arraste o CSV do manifesto aqui</span>
-                      <span className={styles.dzTouch}>Selecione o CSV do manifesto</span>
+                      <span className={styles.dzDesktop}>{config.dropzone}</span>
+                      <span className={styles.dzTouch}>{config.dropzoneTouch}</span>
                     </>
                   )}
                 </span>
@@ -241,7 +301,11 @@ export function ImportManifestoModal({
                 </button>
               )}
               {carregando && (
-                <div className={styles.progress} role="progressbar" aria-label="Importando manifesto">
+                <div
+                  className={styles.progress}
+                  role="progressbar"
+                  aria-label={tipo === "manifesto" ? "Importando manifesto" : "Importando veículos"}
+                >
                   <span className={styles.progressBar} />
                 </div>
               )}
@@ -255,53 +319,59 @@ export function ImportManifestoModal({
             </div>
           )}
 
-          {estado === "idle" && (
+          {(estado === "idle" || estado === "selecionado") && (
             <p className={styles.hint}>
               <FontAwesomeIcon icon={icons.shield} />
-              <span>
-                Motoristas já cadastrados são atualizados automaticamente. Motoristas novos entram
-                no cadastro, mas ficam sinalizados como pendentes de validação.
-              </span>
+              <span>{config.dica}</span>
             </p>
           )}
 
-          {concluido && resultado && (
+          {concluido && resumo && (
             <div className={styles.result} aria-live="polite">
-              <div className={`${styles.status} ${estado === "sucesso" ? styles.success : styles.atencao}`}>
-                <FontAwesomeIcon icon={estado === "sucesso" ? icons.success : icons.warning} />
-                <span>
-                  {estado === "sucesso"
-                    ? "Importação concluída."
-                    : "Importação concluída — há motoristas novos para validar."}
-                </span>
+              <div className={`${styles.status} ${statusClasse}`}>
+                <FontAwesomeIcon icon={statusIcone} />
+                <span>{statusTexto}</span>
               </div>
 
               <dl className={styles.stats}>
                 <div className={styles.stat}>
-                  <dd>{resultado.totalProcessados}</dd>
-                  <dt>{plural(resultado.totalProcessados, "linha lida", "linhas lidas")}</dt>
+                  <dd>{resumo.lidas}</dd>
+                  <dt>{plural(resumo.lidas, "linha lida", "linhas lidas")}</dt>
                 </div>
                 <div className={`${styles.stat} ${styles.statOk}`}>
-                  <dd>{resultado.totalCadastrados}</dd>
-                  <dt>{plural(resultado.totalCadastrados, "importado", "importados")}</dt>
+                  <dd>{resumo.importadas}</dd>
+                  <dt>{plural(resumo.importadas, "importado", "importados")}</dt>
                 </div>
-                <div className={`${styles.stat} ${rejeitados > 0 ? styles.statErr : ""}`}>
-                  <dd>{rejeitados}</dd>
-                  <dt>{plural(rejeitados, "rejeitada", "rejeitadas")}</dt>
+                <div className={`${styles.stat} ${resumo.rejeitadas > 0 ? styles.statErr : ""}`}>
+                  <dd>{resumo.rejeitadas}</dd>
+                  <dt>{plural(resumo.rejeitadas, "rejeitada", "rejeitadas")}</dt>
                 </div>
               </dl>
 
-              {rejeitados > 0 && (
+              {resumo.rejeitadas > 0 && (
                 <p className={styles.rejeitadosNote}>
                   <FontAwesomeIcon icon={icons.error} />
                   <span>
-                    {rejeitados} {plural(rejeitados, "linha foi rejeitada", "linhas foram rejeitadas")}{" "}
-                    por CPF/CNPJ inválido. Corrija no arquivo e importe novamente.
+                    {resumo.rejeitadas}{" "}
+                    {plural(resumo.rejeitadas, "linha foi rejeitada", "linhas foram rejeitadas")}
+                    {motivoRejeicao}. Corrija no arquivo e importe novamente.
                   </span>
                 </p>
               )}
 
-              {estado === "atencao" && <AlertaMotoristasNaoEncontrados motoristas={resultado.novos} />}
+              {tipo === "veiculos" && veiculos.resultado && veiculos.resultado.erros.length > 0 && (
+                <ul className={styles.listaErros}>
+                  {veiculos.resultado.erros.map((erro, i) => (
+                    <li key={i}>
+                      Linha {erro.linha}: {erro.motivo}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {tipo === "manifesto" && estado === "atencao" && manifesto.resultado && (
+                <AlertaMotoristasNaoEncontrados motoristas={manifesto.resultado.novos} />
+              )}
             </div>
           )}
         </div>
@@ -331,7 +401,7 @@ export function ImportManifestoModal({
                     <FontAwesomeIcon icon={icons.retry} /> Tentar novamente
                   </>
                 ) : (
-                  "Importar manifesto"
+                  config.botao
                 )}
               </button>
             </>

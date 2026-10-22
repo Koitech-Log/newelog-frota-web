@@ -1,0 +1,161 @@
+.card {
+  min-width: 0;
+  padding: 20px 22px;
+  background: var(--surface-0);
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition:
+    transform 0.25s var(--ease-out),
+    box-shadow 0.25s var(--ease-out),
+    border-color 0.25s var(--ease-out);
+  /* "backwards": o estado final é liberado, então o hover continua funcionando */
+  animation: entrada 0.55s var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--line);
+}
+
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.titulo {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 14px;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.card:hover .icone {
+  transform: scale(1.12) rotate(-6deg);
+}
+
+.valor {
+  margin: 0;
+  font-size: clamp(22px, 2.1vw, 32px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.positivo {
+  color: var(--green);
+}
+
+.negativo {
+  color: var(--red);
+}
+
+.linhaVariacao {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 24px;
+  margin-top: 10px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  animation: pop 0.45s var(--ease-out) 0.7s backwards;
+}
+
+.badge span {
+  font-size: 9px;
+}
+
+.bom {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.ruim {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.neutro {
+  background: var(--surface-2);
+  color: var(--ink-dim);
+}
+
+.comparacao {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.descricao {
+  margin: 10px 0 0;
+  color: var(--ink-dim);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.somenteLeitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@keyframes entrada {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .badge {
+    animation: none;
+  }
+
+  .card,
+  .icone {
+    transition: none;
+  }
+
+  .card:hover,
+  .card:hover .icone {
+    transform: none;
+  }
+}

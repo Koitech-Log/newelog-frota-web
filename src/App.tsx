@@ -21,7 +21,7 @@ function MobileTopbar({
 }: {
   onAbrirMenu: () => void;
 }) {
-  const { abrirEscolha } = useImportCsv();
+  const { abrirImportacao } = useImportCsv();
   const { isEscuro, alternarTema } = useTheme();
 
   const handleAlternarTema = () => {
@@ -69,7 +69,7 @@ function MobileTopbar({
           type="button"
           className="mobile-import-btn"
           aria-label="Importar CSV"
-          onClick={abrirEscolha}
+          onClick={() => abrirImportacao()}
         >
           <FontAwesomeIcon icon={icons.fileImport} />
         </button>

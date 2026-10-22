@@ -1,35 +1,39 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
-import { EscolhaImportacaoModal } from "../components/EscolhaImportacao";
-import { ImportVeiculosModal } from "../components/ImportVeiculos";
+import { ImportCsvModal } from "../components/ImportCsv";
+import type { TipoImportacao } from "../components/SeletorImportacao";
 import { useImportManifesto } from "./ImportManifestoContext";
 
 interface ImportCsvContextValue {
-    abrirEscolha: () => void;
+    /** Abre o modal de importação de CSV (por padrão no tipo Manifesto). */
+    abrirImportacao: (tipo?: TipoImportacao) => void;
 }
 
 const ImportCsvContext = createContext<ImportCsvContextValue | null>(null);
 
+/**
+ * Controla o modal único de importação de CSV. O tipo (manifesto/veículos)
+ * é escolhido pelo seletor dentro do próprio modal.
+ */
 export function ImportCsvProvider({ children }: { children: ReactNode }) {
-    const { abrirModal: abrirModalManifesto } = useImportManifesto();
-    const [escolhaAberta, setEscolhaAberta] = useState(false);
-    const [veiculosAberto, setVeiculosAberto] = useState(false);
+    const { registrarImportacao } = useImportManifesto();
+    const [aberto, setAberto] = useState(false);
+    const [tipo, setTipo] = useState<TipoImportacao>("manifesto");
+
+    function abrirImportacao(tipoInicial: TipoImportacao = "manifesto") {
+        setTipo(tipoInicial);
+        setAberto(true);
+    }
 
     return (
-        <ImportCsvContext.Provider value={{ abrirEscolha: () => setEscolhaAberta(true) }}>
+        <ImportCsvContext.Provider value={{ abrirImportacao }}>
             {children}
-            <EscolhaImportacaoModal
-                aberto={escolhaAberta}
-                onClose={() => setEscolhaAberta(false)}
-                onEscolherManifesto={() => {
-                    setEscolhaAberta(false);
-                    abrirModalManifesto();
-                }}
-                onEscolherVeiculos={() => {
-                    setEscolhaAberta(false);
-                    setVeiculosAberto(true);
-                }}
+            <ImportCsvModal
+                aberto={aberto}
+                tipo={tipo}
+                onTrocarTipo={setTipo}
+                onClose={() => setAberto(false)}
+                aoImportarManifesto={registrarImportacao}
             />
-            <ImportVeiculosModal aberto={veiculosAberto} onClose={() => setVeiculosAberto(false)} />
         </ImportCsvContext.Provider>
     );
 }

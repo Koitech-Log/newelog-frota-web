@@ -3,7 +3,6 @@ import { icons } from "../icons";
 import { useProfile } from "../../context/ProfileContext";
 import { useAuth } from "../../context/AuthContext";
 import { useImportCsv } from "../../context/ImportCsvContext";
-import { useImportManifesto } from "../../context/ImportManifestoContext";
 import { ThemeToggle } from "../ThemeToggle";
 import styles from "./Sidebar.module.css";
 
@@ -26,8 +25,7 @@ export function Sidebar({
 }: SidebarProps) {
   const { perfil, podeVerFinanceiro } = useProfile();
   const { sessao, signOut } = useAuth();
-  const { abrirEscolha } = useImportCsv();
-  const { abrirModal } = useImportManifesto();
+  const { abrirImportacao } = useImportCsv();
 
   const handleNavClick = (tabKey: string) => {
     if (tabKey === "home" || tabKey === "drivers") {
@@ -45,17 +43,7 @@ export function Sidebar({
     }
 
     if (tabKey === "import") {
-      abrirEscolha();
-
-      if (window.innerWidth <= 900) {
-        onClose();
-      }
-
-      return;
-    }
-
-    if (tabKey === "manifesto") {
-      abrirModal();
+      abrirImportacao();
 
       if (window.innerWidth <= 900) {
         onClose();
@@ -149,15 +137,6 @@ export function Sidebar({
           >
             <FontAwesomeIcon icon={icons.fileImport} />
             <span>Importar CSV</span>
-          </button>
-
-          <button
-            className={styles.navlink}
-            type="button"
-            onClick={() => handleNavClick("manifesto")}
-          >
-            <FontAwesomeIcon icon={icons.fileImport} />
-            <span>Importar manifesto</span>
           </button>
 
           <button

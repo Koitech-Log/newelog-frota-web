@@ -1,0 +1,77 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card {
+  display: grid;
+  gap: 14px;
+  padding: 20px 22px;
+  background: var(--surface-0);
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.bloco {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--surface-2) 30%, var(--surface-3) 50%, var(--surface-2) 70%);
+  background-size: 300% 100%;
+  animation: brilho 1.5s ease-in-out infinite;
+}
+
+.linhaCurta {
+  width: 45%;
+  height: 14px;
+}
+
+.valor {
+  width: 70%;
+  height: 32px;
+}
+
+.linhaMedia {
+  width: 60%;
+  height: 12px;
+}
+
+.faixa {
+  height: 92px;
+  margin-top: 16px;
+  border-radius: var(--radius-lg);
+}
+
+.tabela {
+  height: 300px;
+  margin-top: 16px;
+  border-radius: var(--radius-lg);
+}
+
+@keyframes brilho {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bloco {
+    animation: none;
+  }
+}

@@ -6,13 +6,14 @@ const MANIFESTO_SERVICE_URL =
     import.meta.env.VITE_MANIFESTO_SERVICE_URL ?? "http://localhost:8081";
 
 export const veiculosApi = {
-    async importarCsv(arquivo: File): Promise<VeiculoUploadResponse> {
+    async importarCsv(arquivo: File, signal?: AbortSignal): Promise<VeiculoUploadResponse> {
         const formData = new FormData();
         formData.append("file", arquivo);
 
         const response = await fetch(`${MANIFESTO_SERVICE_URL}/veiculos/upload`, {
             method: "POST",
             body: formData,
+            signal,
         });
 
         if (!response.ok) {

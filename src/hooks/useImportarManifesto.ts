@@ -2,17 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { manifestoApi } from "../api/manifesto";
 import { ApiRequestError } from "../api/client";
 import type { ManifestoUploadResponse } from "../types/manifesto";
-
-export type EstadoImportacao =
-  | "idle" // nenhum arquivo escolhido
-  | "selecionado" // arquivo válido, aguardando confirmação
-  | "carregando"
-  | "sucesso"
-  | "atencao" // importou, mas há motoristas novos a validar
-  | "erro";
-
-/** Limite de tamanho aceito no front-end, para falhar rápido antes do upload. */
-export const TAMANHO_MAXIMO_BYTES = 10 * 1024 * 1024;
+import { validarArquivoCsv, type EstadoImportacao } from "../utils/arquivoCsv";
 
 interface EstadoHook {
   estado: EstadoImportacao;
@@ -28,19 +18,6 @@ const ESTADO_INICIAL: EstadoHook = {
   mensagemErro: null,
 };
 
-function validarArquivo(arquivo: File): string | null {
-  if (!arquivo.name.toLowerCase().endsWith(".csv")) {
-    return "Formato inválido. Envie um arquivo com extensão .csv.";
-  }
-  if (arquivo.size === 0) {
-    return "O arquivo está vazio.";
-  }
-  if (arquivo.size > TAMANHO_MAXIMO_BYTES) {
-    return `O arquivo excede o limite de ${TAMANHO_MAXIMO_BYTES / 1024 / 1024} MB.`;
-  }
-  return null;
-}
-
 export function useImportarManifesto() {
   const [dados, setDados] = useState<EstadoHook>(ESTADO_INICIAL);
   const controllerRef = useRef<AbortController | null>(null);
@@ -50,7 +27,7 @@ export function useImportarManifesto() {
 
   const selecionar = useCallback((arquivo: File | undefined) => {
     if (!arquivo) return;
-    const erro = validarArquivo(arquivo);
+    const erro = validarArquivoCsv(arquivo);
     if (erro) {
       setDados({ estado: "erro", arquivo: null, resultado: null, mensagemErro: erro });
       return;
