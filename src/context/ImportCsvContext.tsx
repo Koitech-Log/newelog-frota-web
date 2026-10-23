@@ -4,44 +4,52 @@ import type { TipoImportacao } from "../components/SeletorImportacao";
 import { useImportManifesto } from "./ImportManifestoContext";
 
 interface ImportCsvContextValue {
-    /** Abre o modal de importação de CSV (por padrão no tipo Manifesto). */
-    abrirImportacao: (tipo?: TipoImportacao) => void;
+  /** Abre o modal de importação de CSV; por padrão, abre em Manifesto. */
+  abrirImportacao: (tipo?: TipoImportacao) => void;
 }
 
 const ImportCsvContext = createContext<ImportCsvContextValue | null>(null);
 
 /**
- * Controla o modal único de importação de CSV. O tipo (manifesto/veículos)
- * é escolhido pelo seletor dentro do próprio modal.
+ * Mantém um único modal para importar manifestos e veículos.
+ * O callback de sincronização do contexto de manifesto é acionado após
+ * a conclusão e o fechamento do modal, conforme o tipo importado.
  */
 export function ImportCsvProvider({ children }: { children: ReactNode }) {
-    const { registrarImportacao } = useImportManifesto();
-    const [aberto, setAberto] = useState(false);
-    const [tipo, setTipo] = useState<TipoImportacao>("manifesto");
+  const { registrarImportacao } = useImportManifesto();
+  const [aberto, setAberto] = useState(false);
+  const [tipo, setTipo] = useState<TipoImportacao>("manifesto");
 
-    function abrirImportacao(tipoInicial: TipoImportacao = "manifesto") {
-        setTipo(tipoInicial);
-        setAberto(true);
-    }
+  function abrirImportacao(tipoInicial: TipoImportacao = "manifesto") {
+    setTipo(tipoInicial);
+    setAberto(true);
+  }
 
-    return (
-        <ImportCsvContext.Provider value={{ abrirImportacao }}>
-            {children}
-            <ImportCsvModal
-                aberto={aberto}
-                tipo={tipo}
-                onTrocarTipo={setTipo}
-                onClose={() => setAberto(false)}
-                aoImportar={registrarImportacao}
-            />
-        </ImportCsvContext.Provider>
-    );
+  function fecharImportacao() {
+    setAberto(false);
+  }
+
+  return (
+    <ImportCsvContext.Provider value={{ abrirImportacao }}>
+      {children}
+      <ImportCsvModal
+        aberto={aberto}
+        tipo={tipo}
+        onTrocarTipo={setTipo}
+        onClose={fecharImportacao}
+        aoImportarManifesto={registrarImportacao}
+        aoImportarVeiculos={registrarImportacao}
+      />
+    </ImportCsvContext.Provider>
+  );
 }
 
 export function useImportCsv(): ImportCsvContextValue {
-    const context = useContext(ImportCsvContext);
-    if (!context) {
-        throw new Error("useImportCsv precisa ser usado dentro de um ImportCsvProvider.");
-    }
-    return context;
+  const context = useContext(ImportCsvContext);
+
+  if (!context) {
+    throw new Error("useImportCsv precisa ser usado dentro de um ImportCsvProvider.");
+  }
+
+  return context;
 }

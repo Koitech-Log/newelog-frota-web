@@ -1,4 +1,5 @@
 export interface ErroLinhaVeiculo {
+    campo: any;
     linha: number;
     motivo: string;
 }

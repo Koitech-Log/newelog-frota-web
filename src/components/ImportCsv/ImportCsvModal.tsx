@@ -5,6 +5,7 @@ import { useImportarManifesto } from "../../hooks/useImportarManifesto";
 import { useImportarVeiculos } from "../../hooks/useImportarVeiculos";
 import { TAMANHO_MAXIMO_BYTES, formatarTamanho, plural } from "../../utils/arquivoCsv";
 import { AlertaMotoristasNaoEncontrados } from "../Alert/AlertaMotoristasNaoEncontrados";
+import { AlertaErrosImportacaoVeiculos } from "../Alert/AlertaErrosImportacaoVeiculos";
 import { SeletorImportacao, type TipoImportacao } from "../SeletorImportacao";
 import styles from "./ImportCsvModal.module.css";
 
@@ -14,7 +15,11 @@ interface ImportCsvModalProps {
   tipo: TipoImportacao;
   onTrocarTipo: (tipo: TipoImportacao) => void;
   onClose: () => void;
-  /** Chamado assim que uma importação (manifesto ou veículos) termina, para sincronizar as telas. */
+  /** Chamado ao sair do modal depois de importar um manifesto (para recarregar listas). */
+  aoImportarManifesto?: () => void;
+  /** Chamado ao sair do modal depois de importar veículos (para recarregar listas). */
+  aoImportarVeiculos?: () => void;
+  /** Callback genérico de compatibilidade, chamado quando qualquer importação termina. */
   aoImportar?: () => void;
 }
 
@@ -51,6 +56,8 @@ export function ImportCsvModal({
   tipo,
   onTrocarTipo,
   onClose,
+  aoImportarManifesto,
+  aoImportarVeiculos,
   aoImportar,
 }: ImportCsvModalProps) {
   const manifesto = useImportarManifesto();
@@ -63,20 +70,33 @@ export function ImportCsvModal({
   const inputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const resetTimerRef = useRef<number | undefined>(undefined);
+  const manifestoNotificadoRef = useRef(false);
+  const veiculosNotificadoRef = useRef(false);
   const titleId = useId();
   const descId = useId();
 
   const carregando = estado === "carregando";
   const concluido = estado === "sucesso" || estado === "atencao";
 
-  // Sincroniza dashboard, lista de motoristas e menu no mesmo instante em que o
-  // CSV termina de ser processado — sem esperar o modal ser fechado.
   const manifestoConcluido = manifesto.estado === "sucesso" || manifesto.estado === "atencao";
   const veiculosConcluido = veiculos.estado === "sucesso" || veiculos.estado === "atencao";
 
+  // Notifica a tela assim que a importação termina, sem depender do fechamento do modal.
+  // As refs evitam chamadas duplicadas em re-renderizações ou mudanças de callback.
   useEffect(() => {
-    if (manifestoConcluido || veiculosConcluido) aoImportar?.();
-  }, [manifestoConcluido, veiculosConcluido, aoImportar]);
+    if (manifestoConcluido && !manifestoNotificadoRef.current) {
+      manifestoNotificadoRef.current = true;
+      aoImportarManifesto?.();
+      aoImportar?.();
+    }
+    if (veiculosConcluido && !veiculosNotificadoRef.current) {
+      veiculosNotificadoRef.current = true;
+      aoImportarVeiculos?.();
+      aoImportar?.();
+    }
+    if (!manifestoConcluido) manifestoNotificadoRef.current = false;
+    if (!veiculosConcluido) veiculosNotificadoRef.current = false;
+  }, [manifestoConcluido, veiculosConcluido, aoImportarManifesto, aoImportarVeiculos, aoImportar]);
 
   function handleFechar() {
     manifesto.cancelar();
@@ -149,18 +169,20 @@ export function ImportCsvModal({
   const mostrarDropzone = !arquivo && !carregando && !concluido;
 
   // Resumo normalizado: os dois tipos mostram os mesmos três números.
+  // Resumo normalizado: os dois tipos mostram os mesmos três números.
   const resumo =
     tipo === "manifesto"
       ? manifesto.resultado && {
-          lidas: manifesto.resultado.totalProcessados,
-          importadas: manifesto.resultado.totalCadastrados,
-          rejeitadas: manifesto.resultado.totalRejeitados ?? 0,
-        }
+        lidas: manifesto.resultado.totalProcessados,
+        importadas: manifesto.resultado.totalCadastrados,
+        rejeitadas: manifesto.resultado.totalRejeitados ?? 0,
+      }
       : veiculos.resultado && {
-          lidas: veiculos.resultado.totalLinhas,
-          importadas: veiculos.resultado.cadastrados,
-          rejeitadas: veiculos.resultado.rejeitados,
-        };
+        lidas: veiculos.resultado.totalLinhas,
+        // novos + já existentes: se todas as placas já existiam, ainda houve importação
+        importadas: veiculos.resultado.cadastrados + veiculos.resultado.atualizados,
+        rejeitadas: veiculos.resultado.rejeitados,
+      };
 
   // Nada foi importado (ex.: todas as linhas rejeitadas) conta como falha.
   const nadaImportado = !!resumo && resumo.importadas === 0;
@@ -340,22 +362,39 @@ export function ImportCsvModal({
                 <span>{statusTexto}</span>
               </div>
 
-              <dl className={styles.stats}>
-                <div className={styles.stat}>
-                  <dd>{resumo.lidas}</dd>
-                  <dt>{plural(resumo.lidas, "linha lida", "linhas lidas")}</dt>
-                </div>
-                <div className={`${styles.stat} ${styles.statOk}`}>
-                  <dd>{resumo.importadas}</dd>
-                  <dt>{plural(resumo.importadas, "importado", "importados")}</dt>
-                </div>
-                <div className={`${styles.stat} ${resumo.rejeitadas > 0 ? styles.statErr : ""}`}>
-                  <dd>{resumo.rejeitadas}</dd>
-                  <dt>{plural(resumo.rejeitadas, "rejeitada", "rejeitadas")}</dt>
-                </div>
-              </dl>
+              {tipo === "veiculos" && veiculos.resultado ? (
+                <dl className={styles.stats}>
+                  <div className={`${styles.stat} ${styles.statOk}`}>
+                    <dd>{veiculos.resultado.cadastrados}</dd>
+                    <dt>{plural(veiculos.resultado.cadastrados, "cadastrado", "cadastrados")}</dt>
+                  </div>
+                  <div className={styles.stat}>
+                    <dd>{veiculos.resultado.atualizados}</dd>
+                    <dt>{plural(veiculos.resultado.atualizados, "já existente", "já existentes")}</dt>
+                  </div>
+                  <div className={`${styles.stat} ${veiculos.resultado.rejeitados > 0 ? styles.statErr : ""}`}>
+                    <dd>{veiculos.resultado.rejeitados}</dd>
+                    <dt>com erro</dt>
+                  </div>
+                </dl>
+              ) : (
+                <dl className={styles.stats}>
+                  <div className={styles.stat}>
+                    <dd>{resumo.lidas}</dd>
+                    <dt>{plural(resumo.lidas, "linha lida", "linhas lidas")}</dt>
+                  </div>
+                  <div className={`${styles.stat} ${styles.statOk}`}>
+                    <dd>{resumo.importadas}</dd>
+                    <dt>{plural(resumo.importadas, "importado", "importados")}</dt>
+                  </div>
+                  <div className={`${styles.stat} ${resumo.rejeitadas > 0 ? styles.statErr : ""}`}>
+                    <dd>{resumo.rejeitadas}</dd>
+                    <dt>{plural(resumo.rejeitadas, "rejeitada", "rejeitadas")}</dt>
+                  </div>
+                </dl>
+              )}
 
-              {resumo.rejeitadas > 0 && (
+              {tipo === "manifesto" && resumo.rejeitadas > 0 && (
                 <p className={styles.rejeitadosNote}>
                   <FontAwesomeIcon icon={icons.error} />
                   <span>
@@ -366,14 +405,8 @@ export function ImportCsvModal({
                 </p>
               )}
 
-              {tipo === "veiculos" && veiculos.resultado && veiculos.resultado.erros.length > 0 && (
-                <ul className={styles.listaErros}>
-                  {veiculos.resultado.erros.map((erro, i) => (
-                    <li key={i}>
-                      Linha {erro.linha}: {erro.motivo}
-                    </li>
-                  ))}
-                </ul>
+              {tipo === "veiculos" && veiculos.resultado && (
+                <AlertaErrosImportacaoVeiculos erros={veiculos.resultado.erros ?? []} />
               )}
 
               {tipo === "manifesto" && estado === "atencao" && manifesto.resultado && (
