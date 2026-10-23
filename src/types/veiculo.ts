@@ -1,6 +1,7 @@
 export interface ErroLinhaVeiculo {
     linha: number;
     motivo: string;
+    campo?: string | null;
 }
 
 export interface VeiculoUploadResponse {

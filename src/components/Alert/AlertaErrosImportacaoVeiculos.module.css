@@ -1,0 +1,66 @@
+.tabelaWrap {
+    max-height: 220px;
+    overflow: auto;
+    background: var(--surface-0);
+    border: 1px solid var(--red-border);
+    border-radius: 8px;
+}
+
+.tabela {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    text-align: left;
+    color: var(--ink);
+}
+
+.tabela th {
+    position: sticky;
+    top: 0;
+    padding: 6px 10px;
+    background: var(--surface-1);
+    color: var(--ink-dim);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.tabela td {
+    padding: 7px 10px;
+    vertical-align: top;
+    border-top: 1px solid var(--line-faint);
+}
+
+.colLinha {
+    width: 56px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.colCampo {
+    width: 110px;
+    font-weight: 500;
+}
+
+.colMotivo {
+    color: var(--ink-dim);
+    overflow-wrap: anywhere;
+}
+
+.dica {
+    margin: 8px 0 0;
+    font-size: 12px;
+}
+
+@media (max-width: 480px) {
+
+    .tabela th,
+    .tabela td {
+        padding: 6px 8px;
+    }
+
+    .colCampo {
+        width: 84px;
+    }
+}
