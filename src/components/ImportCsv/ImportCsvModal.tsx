@@ -17,6 +17,8 @@ interface ImportCsvModalProps {
   onClose: () => void;
   /** Chamado ao sair do modal depois de importar um manifesto (para recarregar listas). */
   aoImportarManifesto?: () => void;
+  /** Chamado ao sair do modal depois de importar veículos (para recarregar listas). */
+  aoImportarVeiculos?: () => void;
 }
 
 /** Textos que mudam conforme o tipo — todo o resto do fluxo é idêntico. */
@@ -53,6 +55,7 @@ export function ImportCsvModal({
   onTrocarTipo,
   onClose,
   aoImportarManifesto,
+  aoImportarVeiculos,
 }: ImportCsvModalProps) {
   const manifesto = useImportarManifesto();
   const veiculos = useImportarVeiculos();
@@ -73,6 +76,7 @@ export function ImportCsvModal({
   function handleFechar() {
     // sair do modal depois de importar um manifesto atualiza as listas
     if (manifesto.estado === "sucesso" || manifesto.estado === "atencao") aoImportarManifesto?.();
+    if (veiculos.estado === "sucesso" || veiculos.estado === "atencao") aoImportarVeiculos?.();
     manifesto.cancelar();
     veiculos.cancelar();
     onClose();
