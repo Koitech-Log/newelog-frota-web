@@ -23,14 +23,7 @@ export function ComposicaoFrete({ frete, custo }: ComposicaoFreteProps) {
   const custosSuperam = temFrete && custo > frete;
 
   return (
-    <section className={styles.card} aria-labelledby="composicao-titulo">
-      <div className={styles.cabecalho}>
-        <h2 id="composicao-titulo" className={styles.titulo}>
-          Composição do frete
-        </h2>
-        <p className={styles.sub}>Quanto do frete vira custo e quanto sobra de resultado.</p>
-      </div>
-
+    <div className={styles.card}>
       {!temFrete ? (
         <p className={styles.vazio}>Sem fretes no período selecionado.</p>
       ) : (
@@ -70,6 +63,6 @@ export function ComposicaoFrete({ frete, custo }: ComposicaoFreteProps) {
           )}
         </>
       )}
-    </section>
+    </div>
   );
 }

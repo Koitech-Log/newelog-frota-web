@@ -1,0 +1,398 @@
+.resumo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0 0 16px;
+  color: var(--ink-dim);
+  font-size: 13px;
+}
+
+.resumo svg {
+  margin-right: 2px;
+  color: var(--ink-faint);
+}
+
+.resumo strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.card {
+  min-width: 0;
+  padding: 18px 20px;
+  background: var(--surface-0);
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition:
+    transform 0.25s var(--ease-out),
+    box-shadow 0.25s var(--ease-out),
+    border-color 0.25s var(--ease-out);
+  animation: entrada 0.5s var(--ease-out) backwards;
+  animation-delay: calc(min(var(--i, 0), 8) * 60ms);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--line);
+}
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 17px;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.card:hover .icone {
+  transform: scale(1.1) rotate(-6deg);
+}
+
+.titulos {
+  min-width: 0;
+}
+
+.nome {
+  margin: 0;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parte {
+  margin: 2px 0 0;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.trilhoFrota {
+  height: 4px;
+  margin: 14px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.barraFrota {
+  display: block;
+  width: var(--w, 0%);
+  height: 100%;
+  border-radius: 999px;
+  background: var(--brand);
+  animation: crescer 0.9s var(--ease-out) backwards;
+  animation-delay: calc(min(var(--i, 0), 8) * 60ms + 200ms);
+}
+
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+
+.numeros div {
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 9px 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--line-faint);
+  border-radius: 10px;
+}
+
+.numeros dd {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.numeros dt {
+  margin-top: 2px;
+  color: var(--ink-faint);
+  font-size: 11.5px;
+}
+
+.de {
+  color: var(--ink-faint);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ocupacao {
+  display: flex;
+  height: 8px;
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.emOperacao {
+  display: block;
+  background: var(--brand);
+  transition: width 0.9s var(--ease-out);
+}
+
+.disponiveis {
+  display: block;
+  background: var(--green);
+  transition: width 0.9s var(--ease-out);
+}
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 8px 0 0;
+  color: var(--ink-dim);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.legenda i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 5px;
+  border-radius: 50%;
+}
+
+.pontoOperacao {
+  background: var(--brand);
+}
+
+.pontoDisponivel {
+  background: var(--green);
+}
+
+.periodo {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-faint);
+}
+
+.periodoTitulo {
+  margin: 0 0 8px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.metricas {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.metricas li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--ink-dim);
+}
+
+.metricas strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.positivo {
+  color: var(--green) !important;
+}
+
+.negativo {
+  color: var(--red) !important;
+}
+
+.semViagens {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 12.5px;
+}
+
+.alternar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 7px 14px;
+  border: 1px solid var(--line-faint);
+  border-radius: 999px;
+  background: var(--surface-0);
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.alternar:hover {
+  border-color: var(--brand-dim);
+  color: var(--ink);
+}
+
+.alternar:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.seta {
+  font-size: 10px;
+  transition: transform 0.25s var(--ease-out);
+}
+
+.setaAberta {
+  transform: rotate(90deg);
+}
+
+.lista {
+  margin-top: 12px;
+  max-height: 260px;
+  overflow: auto;
+  animation: entrada 0.3s var(--ease-out);
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabela th,
+.tabela td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line-faint);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tabela th:first-child,
+.tabela td:nth-child(2) {
+  text-align: left;
+}
+
+.tabela thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-0);
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+.tabela tbody th {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.tabela tbody tr {
+  animation: entrada 0.3s var(--ease-out) backwards;
+  animation-delay: calc(min(var(--i, 0), 10) * 25ms);
+}
+
+.motorista {
+  display: block;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.statusOperacao {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.statusDisponivel {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.vazio {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 13px;
+}
+
+@keyframes entrada {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes crescer {
+  from {
+    width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .barraFrota,
+  .lista,
+  .tabela tbody tr {
+    animation: none;
+  }
+
+  .card,
+  .icone,
+  .seta,
+  .emOperacao,
+  .disponiveis {
+    transition: none;
+  }
+
+  .card:hover,
+  .card:hover .icone {
+    transform: none;
+  }
+}

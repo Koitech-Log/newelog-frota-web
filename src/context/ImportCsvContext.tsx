@@ -32,7 +32,7 @@ export function ImportCsvProvider({ children }: { children: ReactNode }) {
                 tipo={tipo}
                 onTrocarTipo={setTipo}
                 onClose={() => setAberto(false)}
-                aoImportarManifesto={registrarImportacao}
+                aoImportar={registrarImportacao}
             />
         </ImportCsvContext.Provider>
     );

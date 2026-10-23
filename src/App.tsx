@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "./components/icons";
 import { Sidebar } from "./components/Sidebar";
@@ -8,13 +8,9 @@ import { ProfileProvider, useProfile } from "./context/ProfileContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
-import { useMotoristas } from "./hooks/useMotoristas";
 import { ImportManifestoProvider } from "./context/ImportManifestoContext";
+import { FrotaProvider, useFrota } from "./context/FrotaContext";
 import { ImportCsvProvider, useImportCsv } from "./context/ImportCsvContext";
-
-// Lote grande o suficiente para levantar, com boa confiança, todos os tipos
-// de veículo distintos existentes na base.
-const TAMANHO_LOTE_FROTA = 500;
 
 function MobileTopbar({
   onAbrirMenu,
@@ -78,8 +74,8 @@ function MobileTopbar({
   );
 }
 
-/** Área logada: só monta e chama os serviços depois do login. */
-function AppLogado() {
+/** Layout da área logada: menu lateral com os totais + a página selecionada. */
+function Layout() {
   const { podeVerFinanceiro } = useProfile();
 
   const [paginaAtiva, setPaginaAtiva] = useState<
@@ -88,59 +84,49 @@ function AppLogado() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const { totalElementos: motoristasCount } = useMotoristas({
-    page: 0,
-    size: 1,
-  });
-
-  // Contagem dinâmica dos tipos de veículo distintos.
-  const { motoristas: motoristasParaFrota } = useMotoristas({
-    page: 0,
-    size: TAMANHO_LOTE_FROTA,
-  });
-
-  const frotaCount = useMemo(() => {
-    const tipos = new Set<string>();
-
-    motoristasParaFrota.forEach((m) => {
-      if (m.tipoVeiculo) {
-        tipos.add(m.tipoVeiculo.trim().toUpperCase());
-      }
-    });
-
-    return tipos.size;
-  }, [motoristasParaFrota]);
+  const { total: motoristasCount, resumo } = useFrota();
+  const frotaCount = resumo.veiculos.length;
 
   return (
+    <div className="app">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        motoristasCount={motoristasCount}
+        frotaCount={frotaCount}
+        activeTab={paginaAtiva}
+        onNavigate={setPaginaAtiva}
+      />
+
+      <div className="content-col">
+        {/* Cabeçalho visível em telas móveis */}
+        <MobileTopbar
+          onAbrirMenu={() => setIsSidebarOpen(true)}
+        />
+
+        {/* Exibe a página selecionada no menu */}
+        <main className="main">
+          {paginaAtiva === "home" && podeVerFinanceiro ? (
+            <DashboardPage />
+          ) : (
+            <DriversPage />
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+/** Área logada: só monta e chama os serviços depois do login. */
+function AppLogado() {
+  return (
     <ImportManifestoProvider>
-      <ImportCsvProvider>
-        <div className="app">
-          <Sidebar
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-            motoristasCount={motoristasCount}
-            frotaCount={frotaCount}
-            activeTab={paginaAtiva}
-            onNavigate={setPaginaAtiva}
-          />
-
-          <div className="content-col">
-            {/* Cabeçalho visível em telas móveis */}
-            <MobileTopbar
-              onAbrirMenu={() => setIsSidebarOpen(true)}
-            />
-
-            {/* Exibe a página selecionada no menu */}
-            <main className="main">
-              {paginaAtiva === "home" && podeVerFinanceiro ? (
-                <DashboardPage />
-              ) : (
-                <DriversPage />
-              )}
-            </main>
-          </div>
-        </div>
-      </ImportCsvProvider>
+      {/* a frota recarrega sozinha a cada importação de CSV */}
+      <FrotaProvider>
+        <ImportCsvProvider>
+          <Layout />
+        </ImportCsvProvider>
+      </FrotaProvider>
     </ImportManifestoProvider>
   );
 }

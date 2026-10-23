@@ -5,7 +5,7 @@
   border: 1px solid var(--line-faint);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  animation: entrada 0.55s var(--ease-out) 0.55s backwards;
+  animation: entrada 0.55s var(--ease-out) 0.35s backwards;
 }
 
 .header {
@@ -16,15 +16,8 @@
   gap: 14px 20px;
 }
 
-.titulo {
-  margin: 0;
-  font-size: 15px;
-  color: var(--ink-dim);
-  font-weight: 600;
-}
-
 .description {
-  margin: 8px 0 0;
+  margin: 0;
   color: var(--ink-dim);
   font-size: 13px;
   line-height: 1.5;
@@ -276,6 +269,83 @@
   color: var(--ink-dim);
   font-size: 13px;
   line-height: 1.5;
+}
+
+.qtdAba {
+  margin-left: 2px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.segmentoAtivo .qtdAba {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.aviso {
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--ink-dim);
+  font-size: 13px;
+}
+
+.filtroChip {
+  margin-top: 12px;
+  padding: 6px 14px;
+  border: 1px solid var(--line-faint);
+  border-radius: 999px;
+  background: var(--surface-0);
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out),
+    background 0.2s var(--ease-out);
+}
+
+.filtroChip:hover {
+  border-color: var(--brand-dim);
+  color: var(--ink);
+}
+
+.filtroChipAtivo {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.filtroChip:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+.nomeLinha {
+  display: block;
+}
+
+.detalheLinha {
+  display: block;
+  max-width: 280px;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--ink-faint);
+  font-size: 11.5px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linhaParada {
+  opacity: 0.72;
 }
 
 .positive {

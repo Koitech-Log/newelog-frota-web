@@ -14,8 +14,8 @@ interface ImportCsvModalProps {
   tipo: TipoImportacao;
   onTrocarTipo: (tipo: TipoImportacao) => void;
   onClose: () => void;
-  /** Chamado ao sair do modal depois de importar um manifesto (para recarregar listas). */
-  aoImportarManifesto?: () => void;
+  /** Chamado assim que uma importação (manifesto ou veículos) termina, para sincronizar as telas. */
+  aoImportar?: () => void;
 }
 
 /** Textos que mudam conforme o tipo — todo o resto do fluxo é idêntico. */
@@ -51,7 +51,7 @@ export function ImportCsvModal({
   tipo,
   onTrocarTipo,
   onClose,
-  aoImportarManifesto,
+  aoImportar,
 }: ImportCsvModalProps) {
   const manifesto = useImportarManifesto();
   const veiculos = useImportarVeiculos();
@@ -69,9 +69,16 @@ export function ImportCsvModal({
   const carregando = estado === "carregando";
   const concluido = estado === "sucesso" || estado === "atencao";
 
+  // Sincroniza dashboard, lista de motoristas e menu no mesmo instante em que o
+  // CSV termina de ser processado — sem esperar o modal ser fechado.
+  const manifestoConcluido = manifesto.estado === "sucesso" || manifesto.estado === "atencao";
+  const veiculosConcluido = veiculos.estado === "sucesso" || veiculos.estado === "atencao";
+
+  useEffect(() => {
+    if (manifestoConcluido || veiculosConcluido) aoImportar?.();
+  }, [manifestoConcluido, veiculosConcluido, aoImportar]);
+
   function handleFechar() {
-    // sair do modal depois de importar um manifesto atualiza as listas
-    if (manifesto.estado === "sucesso" || manifesto.estado === "atencao") aoImportarManifesto?.();
     manifesto.cancelar();
     veiculos.cancelar();
     onClose();

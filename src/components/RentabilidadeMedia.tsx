@@ -1,7 +1,14 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { RentabilidadeMediaItem, RentabilidadeMediaResponse } from "../api/dashboard";
+import type { RentabilidadeMediaResponse } from "../api/dashboard";
+import type { MotoristaResumo } from "../types/motorista";
 import { icons } from "./icons";
+import {
+  rankingMotoristas,
+  rankingVeiculos,
+  type ItemRanking,
+  type ResumoFrota,
+} from "../utils/frota";
 import { baixarCsv, numeroCsv, textoSeguro } from "../utils/exportarCsv";
 import { inteiro, moeda } from "../utils/formatadores";
 import styles from "./RentabilidadeMedia.module.css";
@@ -28,7 +35,17 @@ function classeSinal(valor: number) {
   return valor < 0 ? styles.negative : valor > 0 ? styles.positive : undefined;
 }
 
-export function RentabilidadeMedia({ dados }: { dados: RentabilidadeMediaResponse }) {
+interface RentabilidadeMediaProps {
+  dados: RentabilidadeMediaResponse;
+  /** Motoristas cadastrados (mesma base da tela de Motoristas). */
+  cadastrados?: MotoristaResumo[] | null;
+  /** Frota derivada do cadastro. */
+  frota?: ResumoFrota | null;
+}
+
+const SEM_DADOS = { semViagens: false, detalhe: null } as const;
+
+export function RentabilidadeMedia({ dados, cadastrados, frota }: RentabilidadeMediaProps) {
   const [tipo, setTipo] = useState<Tipo>("motorista");
   const [busca, setBusca] = useState("");
   const [ordem, setOrdem] = useState<{ chave: ChaveOrdem; direcao: Direcao }>({
@@ -36,18 +53,42 @@ export function RentabilidadeMedia({ dados }: { dados: RentabilidadeMediaRespons
     direcao: "desc",
   });
   const [expandido, setExpandido] = useState(false);
+  const [incluirSemViagens, setIncluirSemViagens] = useState(true);
 
-  const semViagens = dados.geral.quantidadeViagens === 0;
-  const base: RentabilidadeMediaItem[] | undefined =
-    tipo === "motorista" ? dados.porMotorista : dados.porVeiculo;
+  // Quem fez viagens no mês (dados do dashboard) + quem está cadastrado mas ficou
+  // parado: assim as contagens batem com a tela de Motoristas e com o menu.
+  const motoristasBase = useMemo<ItemRanking[]>(
+    () =>
+      cadastrados
+        ? rankingMotoristas(dados.porMotorista, cadastrados)
+        : dados.porMotorista.map((item) => ({ ...item, ...SEM_DADOS })),
+    [dados.porMotorista, cadastrados]
+  );
+  const veiculosBase = useMemo<ItemRanking[]>(
+    () =>
+      frota
+        ? rankingVeiculos(dados.porVeiculo ?? [], frota)
+        : (dados.porVeiculo ?? []).map((item) => ({ ...item, ...SEM_DADOS })),
+    [dados.porVeiculo, frota]
+  );
+
+  const base = tipo === "motorista" ? motoristasBase : veiculosBase;
+  const semViagensQtd = base.filter((item) => item.semViagens).length;
+  const comViagensQtd = base.length - semViagensQtd;
 
   const filtrados = useMemo(() => {
-    if (!base) return [];
     const termo = normalizar(busca.trim());
-    const lista = termo ? base.filter((item) => normalizar(item.nome).includes(termo)) : base;
+    const visiveisBase = incluirSemViagens ? base : base.filter((item) => !item.semViagens);
+    const lista = termo
+      ? visiveisBase.filter((item) => normalizar(`${item.nome} ${item.detalhe ?? ""}`).includes(termo))
+      : visiveisBase;
     const sentido = ordem.direcao === "asc" ? 1 : -1;
+    const porValor = ordem.chave === "rentabilidadeTotal" || ordem.chave === "rentabilidadeMedia";
 
     return [...lista].sort((a, b) => {
+      // quem não teve viagem não tem média: fica sempre no fim das ordenações por valor
+      if (porValor && a.semViagens !== b.semViagens) return a.semViagens ? 1 : -1;
+
       const comparacao =
         ordem.chave === "nome"
           ? a.nome.localeCompare(b.nome, "pt-BR")
@@ -55,10 +96,13 @@ export function RentabilidadeMedia({ dados }: { dados: RentabilidadeMediaRespons
 
       return comparacao * sentido || a.nome.localeCompare(b.nome, "pt-BR");
     });
-  }, [base, busca, ordem]);
+  }, [base, busca, ordem, incluirSemViagens]);
 
   const visiveis = expandido ? filtrados : filtrados.slice(0, LIMITE_INICIAL);
-  const maiorMedia = Math.max(0, ...filtrados.map((item) => Math.abs(item.rentabilidadeMedia)));
+  const maiorMedia = Math.max(
+    0,
+    ...filtrados.filter((item) => !item.semViagens).map((item) => Math.abs(item.rentabilidadeMedia))
+  );
 
   function alternarOrdem(chave: ChaveOrdem) {
     setOrdem((atual) =>
@@ -80,9 +124,10 @@ export function RentabilidadeMedia({ dados }: { dados: RentabilidadeMediaRespons
     const mes = String(dados.mes).padStart(2, "0");
 
     baixarCsv(`rentabilidade-${normalizar(plural)}-${dados.ano}-${mes}.csv`, [
-      [singular, "Viagens", "Rentabilidade total", "Média por viagem"],
+      [singular, "Detalhes", "Viagens", "Rentabilidade total", "Média por viagem"],
       ...filtrados.map((item) => [
         textoSeguro(item.nome),
+        textoSeguro(item.detalhe ?? ""),
         item.quantidadeViagens,
         numeroCsv(item.rentabilidadeTotal),
         numeroCsv(item.rentabilidadeMedia),
@@ -114,16 +159,12 @@ export function RentabilidadeMedia({ dados }: { dados: RentabilidadeMediaRespons
   const { singular, plural } = ROTULOS[tipo];
 
   return (
-    <section className={styles.card} aria-labelledby="comparativo-titulo">
+    <div className={styles.card}>
       <div className={styles.header}>
-        <div>
-          <h2 id="comparativo-titulo" className={styles.titulo}>
-            Comparativo de rentabilidade média
-          </h2>
-          <p className={styles.description}>
-            Rentabilidade por {singular.toLowerCase()} no período — clique nos títulos para ordenar.
-          </p>
-        </div>
+        <p className={styles.description}>
+          Rentabilidade média por {singular.toLowerCase()} no período — clique nos títulos para
+          ordenar.
+        </p>
 
         <div className={styles.acoes}>
           <div className={styles.segmentado} role="group" aria-label="Comparar por">
@@ -135,7 +176,10 @@ export function RentabilidadeMedia({ dados }: { dados: RentabilidadeMediaRespons
                 aria-pressed={tipo === chave}
                 onClick={() => trocarTipo(chave)}
               >
-                {ROTULOS[chave].plural}
+                {ROTULOS[chave].plural}{" "}
+                <span className={styles.qtdAba}>
+                  {inteiro.format((chave === "motorista" ? motoristasBase : veiculosBase).length)}
+                </span>
               </button>
             ))}
           </div>
@@ -151,14 +195,19 @@ export function RentabilidadeMedia({ dados }: { dados: RentabilidadeMediaRespons
         </div>
       </div>
 
-      {semViagens || !base || base.length === 0 ? (
+      {base.length === 0 ? (
         <p className={styles.vazio}>
-          {semViagens
+          {dados.geral.quantidadeViagens === 0
             ? "Nenhuma viagem no período selecionado."
             : `Sem dados de ${plural.toLowerCase()} no período selecionado.`}
         </p>
       ) : (
         <>
+          {dados.geral.quantidadeViagens === 0 && (
+            <p className={styles.aviso}>
+              Nenhuma viagem no período — exibindo apenas os {plural.toLowerCase()} cadastrados.
+            </p>
+          )}
           <div className={styles.busca}>
             <FontAwesomeIcon icon={icons.search} aria-hidden="true" />
             <input
@@ -173,11 +222,26 @@ export function RentabilidadeMedia({ dados }: { dados: RentabilidadeMediaRespons
             />
             <span className={styles.contagem} aria-live="polite">
               {filtrados.length} {filtrados.length === 1 ? singular.toLowerCase() : plural.toLowerCase()}
+              {semViagensQtd > 0 && ` · ${comViagensQtd} com viagens`}
             </span>
           </div>
 
+          {semViagensQtd > 0 && (
+            <button
+              type="button"
+              className={`${styles.filtroChip} ${incluirSemViagens ? styles.filtroChipAtivo : ""}`}
+              aria-pressed={incluirSemViagens}
+              onClick={() => {
+                setIncluirSemViagens((valor) => !valor);
+                setExpandido(false);
+              }}
+            >
+              Incluir {plural.toLowerCase()} sem viagens no período ({inteiro.format(semViagensQtd)})
+            </button>
+          )}
+
           {filtrados.length === 0 ? (
-            <p className={styles.vazio}>Nenhum resultado para “{busca}”.</p>
+            <p className={styles.vazio}>Nenhum resultado{busca ? ` para “${busca}”` : ""}.</p>
           ) : (
             <div
               className={styles.tableScroll}
@@ -207,16 +271,19 @@ export function RentabilidadeMedia({ dados }: { dados: RentabilidadeMediaRespons
                     return (
                       <tr
                         key={`${item.id ?? "sem-cadastro"}-${item.nome}`}
-                        className={styles.linha}
+                        className={`${styles.linha} ${item.semViagens ? styles.linhaParada : ""}`}
                         style={{ "--i": i } as CSSProperties}
                       >
-                        <th scope="row">{item.nome}</th>
+                        <th scope="row">
+                          <span className={styles.nomeLinha}>{item.nome}</span>
+                          {item.detalhe && <span className={styles.detalheLinha}>{item.detalhe}</span>}
+                        </th>
                         <td>{inteiro.format(item.quantidadeViagens)}</td>
-                        <td>{moeda.format(item.rentabilidadeTotal)}</td>
-                        <td className={classeSinal(item.rentabilidadeMedia)}>
+                        <td>{item.semViagens ? "—" : moeda.format(item.rentabilidadeTotal)}</td>
+                        <td className={item.semViagens ? undefined : classeSinal(item.rentabilidadeMedia)}>
                           <span className={styles.mediaCelula}>
                             <span className={styles.trilho} aria-hidden="true">
-                              {item.rentabilidadeMedia !== 0 && (
+                              {!item.semViagens && item.rentabilidadeMedia !== 0 && (
                                 <span
                                   className={`${styles.barra} ${
                                     item.rentabilidadeMedia < 0 ? styles.barraNegativa : ""
@@ -225,7 +292,7 @@ export function RentabilidadeMedia({ dados }: { dados: RentabilidadeMediaRespons
                                 />
                               )}
                             </span>
-                            {moeda.format(item.rentabilidadeMedia)}
+                            {item.semViagens ? "—" : moeda.format(item.rentabilidadeMedia)}
                           </span>
                         </td>
                       </tr>
@@ -250,6 +317,6 @@ export function RentabilidadeMedia({ dados }: { dados: RentabilidadeMediaRespons
           )}
         </>
       )}
-    </section>
+    </div>
   );
 }

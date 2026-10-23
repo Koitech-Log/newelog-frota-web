@@ -59,6 +59,24 @@ import {
   faSackDollar,
   faCoins,
   faStar,
+  faWallet,
+  faReceipt,
+  faPercent,
+  faRoad,
+  faScaleBalanced,
+  faFileInvoiceDollar,
+
+  // ==================== INDICADORES / DASHBOARD ====================
+  faChartLine,
+  faChartPie,
+  faTrophy,
+  faArrowTrendUp,
+  faArrowTrendDown,
+  faMinus,
+  faBolt,
+  faClock,
+  faCalendarDay,
+  faDownload,
 
   // ==================== TEMA ====================
   faSun,
@@ -118,6 +136,24 @@ export const icons = {
   money: faSackDollar,
   coins: faCoins,
   star: faStar,
+  wallet: faWallet,
+  receipt: faReceipt,
+  percent: faPercent,
+  road: faRoad,
+  scale: faScaleBalanced,
+  invoice: faFileInvoiceDollar,
+
+  // Indicadores / Dashboard
+  chartLine: faChartLine,
+  chartPie: faChartPie,
+  trophy: faTrophy,
+  trendUp: faArrowTrendUp,
+  trendDown: faArrowTrendDown,
+  flat: faMinus,
+  bolt: faBolt,
+  clock: faClock,
+  calendarDay: faCalendarDay,
+  download: faDownload,
 
   // Tema
   sun: faSun,

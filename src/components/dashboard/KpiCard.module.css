@@ -1,4 +1,7 @@
 .card {
+  --accent: var(--brand);
+  position: relative;
+  overflow: hidden;
   min-width: 0;
   padding: 20px 22px;
   background: var(--surface-0);
@@ -12,6 +15,35 @@
   /* "backwards": o estado final é liberado, então o hover continua funcionando */
   animation: entrada 0.55s var(--ease-out) backwards;
   animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* faixa de cor no topo, no estilo dos cartões de status */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent 85%);
+}
+
+.brand {
+  --accent: var(--brand);
+}
+
+.green {
+  --accent: var(--green);
+}
+
+.red {
+  --accent: var(--red);
+}
+
+.cyan {
+  --accent: var(--cyan);
+}
+
+.amber {
+  --accent: var(--star);
 }
 
 .card:hover {
@@ -42,8 +74,8 @@
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  background: var(--brand-soft);
-  color: var(--brand);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
   font-size: 14px;
   transition: transform 0.3s var(--ease-out);
 }
@@ -77,37 +109,6 @@
   margin-top: 10px;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  animation: pop 0.45s var(--ease-out) 0.7s backwards;
-}
-
-.badge span {
-  font-size: 9px;
-}
-
-.bom {
-  background: var(--green-soft);
-  color: var(--green);
-}
-
-.ruim {
-  background: var(--red-soft);
-  color: var(--red);
-}
-
-.neutro {
-  background: var(--surface-2);
-  color: var(--ink-dim);
-}
-
 .comparacao {
   color: var(--ink-faint);
   font-size: 12px;
@@ -136,16 +137,8 @@
   }
 }
 
-@keyframes pop {
-  from {
-    opacity: 0;
-    transform: scale(0.7);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .card,
-  .badge {
+  .card {
     animation: none;
   }
 

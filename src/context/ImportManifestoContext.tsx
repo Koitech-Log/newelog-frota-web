@@ -1,33 +1,36 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 interface ImportManifestoContextValue {
-  /** Incrementa a cada importação concluída — usado como gatilho para recarregar listas. */
+  /** Incrementa a cada importação concluída — gatilho para recarregar listas e totais. */
   versaoImportacao: number;
-  /** Avisa que uma importação de manifesto terminou (dispara o recarregamento das listas). */
+  /** Avisa que uma importação (manifesto ou veículos) terminou. */
   registrarImportacao: () => void;
 }
 
 const ImportManifestoContext = createContext<ImportManifestoContextValue | null>(null);
 
 /**
- * Guarda a "versão" das importações de manifesto para que as páginas
- * (Motoristas, Dashboard) recarreguem suas listas quando uma importação
- * termina. Os modais de importação ficam no ImportCsvContext, que decide
- * qual deles está aberto.
+ * Guarda a "versão" das importações de CSV para que as telas (Motoristas,
+ * Dashboard) e os totais do menu recarreguem quando uma importação termina.
+ * Os modais de importação ficam no ImportCsvContext.
  */
 export function ImportManifestoProvider({ children }: { children: ReactNode }) {
   const [versaoImportacao, setVersaoImportacao] = useState(0);
+  const registrarImportacao = useCallback(() => setVersaoImportacao((v) => v + 1), []);
 
-  return (
-    <ImportManifestoContext.Provider
-      value={{
-        versaoImportacao,
-        registrarImportacao: () => setVersaoImportacao((v) => v + 1),
-      }}
-    >
-      {children}
-    </ImportManifestoContext.Provider>
+  const value = useMemo(
+    () => ({ versaoImportacao, registrarImportacao }),
+    [versaoImportacao, registrarImportacao]
   );
+
+  return <ImportManifestoContext.Provider value={value}>{children}</ImportManifestoContext.Provider>;
 }
 
 export function useImportManifesto(): ImportManifestoContextValue {

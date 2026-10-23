@@ -1,0 +1,52 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  animation: pop 0.45s var(--ease-out) 0.7s backwards;
+}
+
+.badge svg {
+  font-size: 10px;
+}
+
+.bom {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.ruim {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.neutro {
+  background: var(--surface-2);
+  color: var(--ink-dim);
+}
+
+.somenteLeitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge {
+    animation: none;
+  }
+}

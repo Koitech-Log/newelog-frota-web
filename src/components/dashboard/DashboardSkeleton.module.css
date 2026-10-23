@@ -37,6 +37,12 @@
   height: 12px;
 }
 
+.resumo {
+  height: 88px;
+  margin-bottom: 16px;
+  border-radius: var(--radius-lg);
+}
+
 .faixa {
   height: 92px;
   margin-top: 16px;

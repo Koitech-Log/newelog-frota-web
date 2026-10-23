@@ -4,6 +4,7 @@ import styles from "./DashboardSkeleton.module.css";
 export function DashboardSkeleton() {
   return (
     <div aria-hidden="true">
+      <span className={`${styles.bloco} ${styles.resumo}`} />
       <div className={styles.grid}>
         {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className={styles.card}>
