@@ -1,5 +1,6 @@
 import type { ApiErro } from "../types/motorista";
 import { lerToken, notificarSessaoExpirada } from "./session";
+import { AUTH_SERVICE_URL } from "./auth";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
@@ -14,7 +15,11 @@ export class ApiRequestError extends Error {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function request<T>(
+  path: string,
+  init: RequestInit = {},
+  baseUrl = API_BASE_URL,
+): Promise<T> {
   const headers = new Headers(init.headers);
 
   if (init.body && !headers.has("Content-Type")) {
@@ -26,7 +31,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${baseUrl}${path}`, {
     ...init,
     headers,
   });
@@ -69,4 +74,9 @@ export const apiClient = {
       method: "PATCH",
       body: JSON.stringify(body),
     }),
+};
+
+export const authApiClient = {
+  get: <T>(path: string, signal?: AbortSignal) =>
+    request<T>(path, { method: "GET", signal }, AUTH_SERVICE_URL),
 };

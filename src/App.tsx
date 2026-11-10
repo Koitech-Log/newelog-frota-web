@@ -1,16 +1,17 @@
-import { useState, useLayoutEffect } from "react";
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "./components/icons";
 import { Sidebar } from "./components/Sidebar";
 import { DriversPage } from "./pages/DriversPage";
 import { DashboardPage } from "./pages/DashboardPage";
-import { ProfileProvider } from "./context/ProfileContext";
+import { ProfileProvider, useProfile } from "./context/ProfileContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { ImportManifestoProvider } from "./context/ImportManifestoContext";
 import { FrotaProvider, useFrota } from "./context/FrotaContext";
 import { ImportCsvProvider, useImportCsv } from "./context/ImportCsvContext";
+import { UsuariosPage } from "./pages/UsuariosPage";
 
 function MobileTopbar({
   onAbrirMenu,
@@ -76,19 +77,11 @@ function MobileTopbar({
 
 /** Layout da área logada: menu lateral com os totais + a página selecionada. */
 function Layout() {
-  // A Visão geral é a página inicial de todos os perfis (os valores financeiros
-  // dentro dela aparecem só para quem tem permissão).
-  const [paginaAtiva, setPaginaAtiva] = useState<
-    "home" | "drivers"
-  >("home");
+  const { perfil, podeVerFinanceiro } = useProfile();
 
-  // Ao trocar de página, volta ao topo (o scroll é do documento, então ele
-  // seria carregado de uma página para a outra).
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, [paginaAtiva]);
+  const [paginaAtiva, setPaginaAtiva] = useState<
+    "home" | "drivers" | "usuarios"
+  >("drivers");
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -114,7 +107,9 @@ function Layout() {
 
         {/* Exibe a página selecionada no menu */}
         <main className="main">
-          {paginaAtiva === "home" ? (
+          {paginaAtiva === "usuarios" && perfil === "gestor" ? (
+            <UsuariosPage />
+          ) : paginaAtiva === "home" && podeVerFinanceiro ? (
             <DashboardPage />
           ) : (
             <DriversPage />

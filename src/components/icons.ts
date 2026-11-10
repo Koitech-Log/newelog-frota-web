@@ -24,6 +24,7 @@ import {
   faEnvelope,
   faLock,
   faArrowRightToBracket,
+  faUsers,
 
   // ==================== FROTA / VEÍCULOS ====================
   faTruck,
@@ -97,6 +98,7 @@ export const icons = {
   userGear: faUserGear,
   userPlus: faUserPlus,
   idCard: faIdCard,
+  users: faUsers,
   rankingStar: faRankingStar,
   fileImport: faFileImport,
   fileExport: faFileExport,

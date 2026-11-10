@@ -11,8 +11,8 @@ interface SidebarProps {
   onClose: () => void;
   motoristasCount?: number;
   frotaCount?: number;
-  activeTab: "home" | "drivers";
-  onNavigate: (pagina: "home" | "drivers") => void;
+  activeTab: "home" | "drivers" | "usuarios";
+  onNavigate: (pagina: "home" | "drivers" | "usuarios") => void;
 }
 
 export function Sidebar({
@@ -23,12 +23,21 @@ export function Sidebar({
   activeTab,
   onNavigate,
 }: SidebarProps) {
-  const { perfil } = useProfile();
+  const { perfil, podeVerFinanceiro } = useProfile();
   const { sessao, signOut } = useAuth();
   const { abrirImportacao } = useImportCsv();
 
   const handleNavClick = (tabKey: string) => {
-    if (tabKey === "home" || tabKey === "drivers") {
+    if (tabKey === "home" || tabKey === "drivers" || tabKey === "usuarios") {
+      if (tabKey === "home" && !podeVerFinanceiro) {
+        return;
+      }
+
+      if (tabKey === "usuarios" && perfil !== "gestor") {
+        return;
+      }
+
+
       onNavigate(tabKey);
 
       if (window.innerWidth <= 900) {
@@ -79,16 +88,18 @@ export function Sidebar({
         <nav aria-label="Navegação principal">
           <div className={styles.navGroupLabel}>Painel</div>
 
-          <button
-            className={`${styles.navlink} ${
-              activeTab === "home" ? styles.active : ""
-            }`}
-            type="button"
-            onClick={() => handleNavClick("home")}
-          >
-            <FontAwesomeIcon icon={icons.gauge} />
-            <span>Visão geral</span>
-          </button>
+          {podeVerFinanceiro && (
+            <button
+              className={`${styles.navlink} ${
+                activeTab === "home" ? styles.active : ""
+              }`}
+              type="button"
+              onClick={() => handleNavClick("home")}
+            >
+              <FontAwesomeIcon icon={icons.gauge} />
+              <span>Visão geral</span>
+            </button>
+          )}
 
           <button
             className={styles.navlink}
@@ -120,6 +131,19 @@ export function Sidebar({
             <FontAwesomeIcon icon={icons.rankingStar} />
             <span>Ranking</span>
           </button>
+
+          {perfil === "gestor" && (
+            <button
+              className={`${styles.navlink} ${
+                activeTab === "usuarios" ? styles.active : ""
+              }`}
+              type="button"
+              onClick={() => handleNavClick("usuarios")}
+            >
+              <FontAwesomeIcon icon={icons.users} />
+              <span>Usuários</span>
+            </button>
+          )}
 
           {/* DADOS */}
           <div className={styles.navGroupLabel}>Dados</div>
