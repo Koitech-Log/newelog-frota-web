@@ -34,30 +34,38 @@
   display: inline-flex;
   gap: 3px;
   padding: 3px;
-  background: var(--surface-1);
+  background: var(--surface-2);
   border: 1px solid var(--line-faint);
   border-radius: 11px;
+  box-shadow: none;
 }
 
 .segmento {
   padding: 7px 14px;
   border-radius: 8px;
-  color: var(--ink-dim);
+  color: var(--ink);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s var(--ease-out), color 0.2s var(--ease-out);
+  transition:
+    background 0.2s var(--ease-out),
+    color 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
+  background: transparent;
 }
 
 .segmento:hover:not(.segmentoAtivo) {
+  background: var(--surface-3);
   color: var(--ink);
-  background: var(--surface-2);
 }
 
+/* selecionado: o mesmo azul sólido usado nos demais filtros */
 .segmentoAtivo {
-  background: var(--brand-soft);
-  color: var(--brand);
+  background: linear-gradient(135deg, var(--btn, var(--brand)), var(--btn-bright, var(--brand-bright)));
+  color: #fff;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--btn, var(--brand)) 32%, transparent);
   cursor: default;
+  border-color: var(--btn, var(--brand));
 }
 
 .exportar {
@@ -65,9 +73,9 @@
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-faint);
   border-radius: var(--radius-sm);
-  background: var(--surface-0);
+  background: var(--surface-2);
   color: var(--ink);
   font: inherit;
   font-size: 13px;
@@ -76,8 +84,11 @@
 }
 
 .exportar:hover:not(:disabled) {
-  background: var(--surface-2);
-  border-color: var(--brand-dim);
+  background: var(--surface-3);
+  border-color: var(--line);
+  color: var(--ink);
+  box-shadow: none;
+  filter: none;
 }
 
 .exportar:disabled {
@@ -181,35 +192,48 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px;
-  border-radius: 6px;
-  color: inherit;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: var(--ink);
   font: inherit;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: color 0.2s var(--ease-out), background 0.2s var(--ease-out);
+  transition:
+    color 0.2s var(--ease-out),
+    background 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
+  background: var(--surface-2);
+  border: 1px solid var(--line-faint);
 }
 
-.sortBtn:hover {
+.sortBtn:hover:not(.sortBtnAtivo) {
+  background: var(--surface-3);
   color: var(--ink);
-  background: var(--surface-2);
+}
+
+.sortBtnAtivo {
+  background: linear-gradient(135deg, var(--btn, var(--brand)), var(--btn-bright, var(--brand-bright)));
+  color: #fff;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--btn, var(--brand)) 32%, transparent);
+  border-color: var(--btn, var(--brand));
 }
 
 .seta {
   font-size: 9px;
   opacity: 0;
-  transition: transform 0.25s var(--ease-out), opacity 0.2s var(--ease-out);
+  transition:
+    transform 0.25s var(--ease-out),
+    opacity 0.2s var(--ease-out);
 }
 
 .sortBtn:hover .seta {
-  opacity: 0.4;
+  opacity: 0.5;
 }
 
 .setaAtiva,
 .sortBtn:hover .setaAtiva {
   opacity: 1;
-  color: var(--brand);
 }
 
 .setaAsc {
@@ -251,17 +275,22 @@
   padding: 8px 18px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: var(--surface-0);
-  color: var(--ink-dim);
+  background: linear-gradient(135deg, var(--btn, var(--brand)), var(--btn-bright, var(--brand-bright)));
+  color: #fff;
   font: inherit;
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.2s var(--ease-out), color 0.2s var(--ease-out);
+  transition: background 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+  border-color: var(--btn, var(--brand));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--btn, var(--brand)) 32%, transparent);
 }
 
 .verMais:hover {
-  background: var(--surface-2);
-  color: var(--ink);
+  background: linear-gradient(135deg, var(--btn, var(--brand)), var(--btn-bright, var(--brand-bright)));
+  border-color: var(--btn, var(--brand));
+  color: #fff;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--btn, var(--brand)) 40%, transparent);
+  filter: brightness(1.08);
 }
 
 .vazio {
@@ -275,15 +304,15 @@
   margin-left: 2px;
   padding: 1px 7px;
   border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--ink-faint);
+  background: var(--surface-3);
+  color: var(--ink-dim);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
 .segmentoAtivo .qtdAba {
-  background: var(--brand-soft);
-  color: var(--brand);
+  background: rgba(255, 255, 255, 0.24);
+  color: #fff;
 }
 
 .aviso {
@@ -297,30 +326,54 @@
 }
 
 .filtroChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin-top: 12px;
   padding: 6px 14px;
   border: 1px solid var(--line-faint);
   border-radius: 999px;
-  background: var(--surface-0);
-  color: var(--ink-dim);
+  background: var(--surface-2);
+  color: var(--ink);
   font: inherit;
   font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
   transition:
+    background 0.2s var(--ease-out),
     border-color 0.2s var(--ease-out),
-    color 0.2s var(--ease-out),
-    background 0.2s var(--ease-out);
+    box-shadow 0.2s var(--ease-out);
 }
 
-.filtroChip:hover {
-  border-color: var(--brand-dim);
+.filtroChip::before {
+  content: "";
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid var(--ink-faint);
+  border-radius: 4px;
+  transition:
+    background 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out);
+}
+
+.filtroChip:hover:not(.filtroChipAtivo) {
+  background: var(--surface-3);
   color: var(--ink);
 }
 
+/* ligado: azul sólido com a caixa marcada */
 .filtroChipAtivo {
-  border-color: var(--brand);
-  background: var(--brand-soft);
-  color: var(--brand);
+  border-color: var(--btn, var(--brand));
+  background: linear-gradient(135deg, var(--btn, var(--brand)), var(--btn-bright, var(--brand-bright)));
+  color: #fff;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--btn, var(--brand)) 32%, transparent);
+}
+
+.filtroChipAtivo::before {
+  border-color: #fff;
+  background: #fff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2 5 8.6l4.5-5' fill='none' stroke='%231f4af4' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / 100% no-repeat;
 }
 
 .filtroChip:focus-visible {

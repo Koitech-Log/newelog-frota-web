@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useLayoutEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "./components/icons";
 import { Sidebar } from "./components/Sidebar";
 import { DriversPage } from "./pages/DriversPage";
 import { DashboardPage } from "./pages/DashboardPage";
-import { ProfileProvider, useProfile } from "./context/ProfileContext";
+import { ProfileProvider } from "./context/ProfileContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
@@ -76,11 +76,19 @@ function MobileTopbar({
 
 /** Layout da área logada: menu lateral com os totais + a página selecionada. */
 function Layout() {
-  const { podeVerFinanceiro } = useProfile();
-
+  // A Visão geral é a página inicial de todos os perfis (os valores financeiros
+  // dentro dela aparecem só para quem tem permissão).
   const [paginaAtiva, setPaginaAtiva] = useState<
     "home" | "drivers"
-  >("drivers");
+  >("home");
+
+  // Ao trocar de página, volta ao topo (o scroll é do documento, então ele
+  // seria carregado de uma página para a outra).
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [paginaAtiva]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -106,7 +114,7 @@ function Layout() {
 
         {/* Exibe a página selecionada no menu */}
         <main className="main">
-          {paginaAtiva === "home" && podeVerFinanceiro ? (
+          {paginaAtiva === "home" ? (
             <DashboardPage />
           ) : (
             <DriversPage />

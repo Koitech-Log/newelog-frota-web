@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Alert } from "./Alert";
 import type { ErroLinhaVeiculo } from "../../types/veiculo";
 import { plural } from "../../utils/arquivoCsv";
@@ -38,7 +39,7 @@ export function AlertaErrosImportacaoVeiculos({ erros }: AlertaErrosImportacaoVe
                     </thead>
                     <tbody>
                         {erros.map((erro, indice) => (
-                            <tr key={`${erro.linha}-${indice}`}>
+                            <tr key={`${erro.linha}-${indice}`} style={{ "--i": indice } as CSSProperties}>
                                 <td className={styles.colLinha}>{erro.linha}</td>
                                 <td className={styles.colCampo}>{erro.campo?.trim() || "—"}</td>
                                 <td className={styles.colMotivo}>{erro.motivo}</td>

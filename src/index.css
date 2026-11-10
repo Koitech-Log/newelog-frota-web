@@ -13,6 +13,11 @@
   --brand-dim: #13309e;
   --brand-soft: rgba(31, 74, 244, 0.09);
 
+  /* botões sólidos: azul com contraste para texto branco */
+  --btn: #1f4af4;
+  --btn-bright: #3d63ff;
+  --btn-ink: #13309e;
+
   /* Aliases para compatibilidade total com a Sidebar */
   --amber: #1f4af4;
   --amber-bright: #3d63ff;
@@ -92,6 +97,11 @@
   --brand-bright: #6f96ff;
   --brand-dim: #a9c0ff;
   --brand-soft: rgba(77, 123, 255, 0.16);
+
+  /* no escuro o --brand é claro demais para texto branco: botões usam um azul mais profundo */
+  --btn: #2f5bf0;
+  --btn-bright: #3f68f5;
+  --btn-ink: #1c3aa8;
 
   --amber: #4d7bff;
   --amber-bright: #6f96ff;

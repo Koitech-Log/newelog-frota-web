@@ -23,16 +23,12 @@ export function Sidebar({
   activeTab,
   onNavigate,
 }: SidebarProps) {
-  const { perfil, podeVerFinanceiro } = useProfile();
+  const { perfil } = useProfile();
   const { sessao, signOut } = useAuth();
   const { abrirImportacao } = useImportCsv();
 
   const handleNavClick = (tabKey: string) => {
     if (tabKey === "home" || tabKey === "drivers") {
-      if (tabKey === "home" && !podeVerFinanceiro) {
-        return;
-      }
-
       onNavigate(tabKey);
 
       if (window.innerWidth <= 900) {
@@ -83,18 +79,16 @@ export function Sidebar({
         <nav aria-label="Navegação principal">
           <div className={styles.navGroupLabel}>Painel</div>
 
-          {podeVerFinanceiro && (
-            <button
-              className={`${styles.navlink} ${
-                activeTab === "home" ? styles.active : ""
-              }`}
-              type="button"
-              onClick={() => handleNavClick("home")}
-            >
-              <FontAwesomeIcon icon={icons.gauge} />
-              <span>Visão geral</span>
-            </button>
-          )}
+          <button
+            className={`${styles.navlink} ${
+              activeTab === "home" ? styles.active : ""
+            }`}
+            type="button"
+            onClick={() => handleNavClick("home")}
+          >
+            <FontAwesomeIcon icon={icons.gauge} />
+            <span>Visão geral</span>
+          </button>
 
           <button
             className={styles.navlink}

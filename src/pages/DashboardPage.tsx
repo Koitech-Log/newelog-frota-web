@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useImportManifesto } from "../context/ImportManifestoContext";
 import { useFrota } from "../context/FrotaContext";
+import { useProfile } from "../context/ProfileContext";
 import { useDashboard } from "../hooks/useDashboard";
 import { icons } from "../components/icons";
 import { KpiCard } from "../components/dashboard/KpiCard";
@@ -9,6 +10,7 @@ import { ResumoPeriodo } from "../components/dashboard/ResumoPeriodo";
 import { Destaques } from "../components/dashboard/Destaques";
 import { FrotaPorTipo } from "../components/dashboard/FrotaPorTipo";
 import { SecaoDashboard } from "../components/dashboard/SecaoDashboard";
+import { SeletorPeriodo } from "../components/dashboard/SeletorPeriodo";
 import { ComposicaoFrete } from "../components/dashboard/ComposicaoFrete";
 import { DashboardSkeleton } from "../components/dashboard/DashboardSkeleton";
 import { RentabilidadeMedia } from "../components/RentabilidadeMedia";
@@ -17,7 +19,7 @@ import { decimal1, inteiro, moeda } from "../utils/formatadores";
 import { variacaoPercentual, variacaoPontos, type Variacao } from "../utils/variacao";
 import styles from "./DashboardPage.module.css";
 
-const INTERVALO_AUTO_MS = 60_000;
+const INTERVALO_AUTO_S = 60;
 const CHAVE_AUTO = "dashboard:atualizar-automaticamente";
 
 const formatadorHora = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -54,8 +56,11 @@ export function DashboardPage() {
   const [autoAtualizar, setAutoAtualizar] = useState(lerAutoAtualizar);
 
   const { versaoImportacao } = useImportManifesto();
+  // Valores financeiros só para quem tem permissão; os demais perfis veem a visão
+  // operacional (frota e cadastro) e nada financeiro é nem buscado.
+  const { podeVerFinanceiro } = useProfile();
   const { atual, anterior, carregando, atualizando, erro, atualizadoEm, recarregar } =
-    useDashboard(periodo.ano, periodo.mes, versaoImportacao);
+    useDashboard(periodo.ano, periodo.mes, versaoImportacao, podeVerFinanceiro);
 
   // Cadastro de motoristas e frota: a MESMA fonte do menu lateral e da tela de
   // Motoristas, que também recarrega sozinha a cada importação de CSV.
@@ -72,16 +77,27 @@ export function DashboardPage() {
     recarregarFrota();
   }, [recarregar, recarregarFrota]);
 
-  // Atualização automática: só recarrega com a aba visível, para não gastar requisições à toa.
+  // Atualização automática: a cada 60 s (com contagem regressiva no botão). Só recarrega
+  // com a aba visível e reinicia a contagem sempre que os dados são atualizados.
+  const [restante, setRestante] = useState(INTERVALO_AUTO_S);
+
   useEffect(() => {
     if (!autoAtualizar) return;
 
+    let inicio = Date.now();
+
     const id = window.setInterval(() => {
-      if (document.visibilityState === "visible") recarregarTudo();
-    }, INTERVALO_AUTO_MS);
+      const faltam = Math.max(INTERVALO_AUTO_S - Math.floor((Date.now() - inicio) / 1000), 0);
+      setRestante(faltam);
+
+      if (faltam === 0) {
+        inicio = Date.now();
+        if (document.visibilityState === "visible") recarregarTudo();
+      }
+    }, 1000);
 
     return () => window.clearInterval(id);
-  }, [autoAtualizar, recarregarTudo]);
+  }, [autoAtualizar, recarregarTudo, atualizadoEm]);
 
   function alternarAuto() {
     const ligado = !autoAtualizar;
@@ -115,15 +131,6 @@ export function DashboardPage() {
     if (ano < 1 || ano > 9999) return;
 
     setPeriodo({ ano, mes: (indice % 12) + 1 });
-  }
-
-  function alterarPeriodo(valor: string) {
-    if (!/^\d{4}-\d{2}$/.test(valor)) return;
-
-    const [ano, mes] = valor.split("-").map(Number);
-    if (ano < 1 || ano > 9999 || mes < 1 || mes > 12) return;
-
-    irParaIndice(ano * 12 + (mes - 1));
   }
 
   // ---- indicadores derivados --------------------------------------------------
@@ -187,56 +194,138 @@ export function DashboardPage() {
   const pctOperacao =
     frota.totalMotoristas > 0 ? (frota.emOperacao / frota.totalMotoristas) * 100 : 0;
 
+  const secaoFrota = (
+      <SecaoDashboard
+        id="sec-frota"
+        icone={icons.truck}
+        titulo="Frota e cadastro"
+        dica="Mesma base da tela de Motoristas — atualizada a cada importação de CSV."
+      >
+        {carregandoFrota && cadastrados.length === 0 ? (
+          <div className={styles.frotaCarregando} aria-hidden="true" />
+        ) : erroFrota && cadastrados.length === 0 ? (
+          <div className={styles.frotaErro} role="alert">
+            <span>{erroFrota}</span>
+            <button type="button" className={styles.chip} onClick={recarregarFrota}>
+              <FontAwesomeIcon icon={icons.retry} /> Tentar novamente
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className={`${styles.grid} ${styles.gridFrota}`}>
+              <KpiCard
+                indice={0}
+                titulo="Motoristas cadastrados"
+                valor={frota.totalMotoristas}
+                formato="inteiro"
+                icone={icons.idCard}
+                cor="brand"
+                descricao={
+                  podeVerFinanceiro
+                    ? `${inteiro.format(cadastradosComViagem)} com viagens em ${nomePeriodo} · ${inteiro.format(cadastradosSemViagem)} sem viagens no período.`
+                    : "Total de motoristas no cadastro."
+                }
+              />
+
+              <KpiCard
+                indice={1}
+                titulo="Veículos na frota"
+                valor={frota.veiculos.length}
+                formato="inteiro"
+                icone={icons.truck}
+                cor="cyan"
+                descricao={`${inteiro.format(frota.quantidadeTipos)} ${
+                  frota.quantidadeTipos === 1 ? "tipo" : "tipos"
+                } de veículo${
+                  frota.motoristasSemVeiculo > 0
+                    ? ` · ${inteiro.format(frota.motoristasSemVeiculo)} ${
+                        frota.motoristasSemVeiculo === 1 ? "motorista" : "motoristas"
+                      } sem veículo`
+                    : ""
+                }.`}
+              />
+
+              <KpiCard
+                indice={2}
+                titulo="Em operação"
+                valor={frota.emOperacao}
+                formato="inteiro"
+                icone={icons.route}
+                cor="amber"
+                descricao={`${decimal1.format(pctOperacao)}% dos motoristas cadastrados.`}
+              />
+
+              <KpiCard
+                indice={3}
+                titulo="Disponíveis"
+                valor={frota.disponiveis}
+                formato="inteiro"
+                icone={icons.success}
+                cor="green"
+                descricao="Prontos para novas viagens."
+              />
+            </div>
+
+            <div className={styles.frotaTipos}>
+              <FrotaPorTipo
+                frota={frota}
+                porVeiculo={atual?.porVeiculo ?? []}
+                mostrarDesempenho={podeVerFinanceiro}
+                nomePeriodo={nomePeriodo}
+              />
+            </div>
+          </>
+        )}
+      </SecaoDashboard>
+  );
+
   return (
     <div className={styles.page} aria-busy={ocupado}>
-      <span className={styles.eyebrow}>Painel financeiro</span>
+      <span className={styles.eyebrow}>
+        {podeVerFinanceiro ? "Painel financeiro" : "Painel operacional"}
+      </span>
       <h1 className={styles.title}>Visão geral</h1>
       <p className={styles.subtitle}>
-        Acompanhe fretes, custos e rentabilidade da operação em {nomePeriodo} — com comparação
-        automática com o mês anterior.
+        {podeVerFinanceiro
+          ? `Acompanhe fretes, custos e rentabilidade da operação em ${nomePeriodo} — com comparação automática com o mês anterior.`
+          : "Acompanhe os motoristas e a frota da operação — disponibilidade, veículos e tipos de veículo."}
       </p>
 
       <div className={styles.toolbar} role="toolbar" aria-label="Filtros e ações do painel">
-        <div className={styles.periodo}>
-          <button
-            type="button"
-            className={styles.navBtn}
-            onClick={() => irParaIndice(indicePeriodo - 1)}
-            disabled={!podeVoltar}
-            aria-label="Mês anterior"
-            title="Mês anterior"
-          >
-            <FontAwesomeIcon icon={icons.chevronLeft} />
-          </button>
+        {podeVerFinanceiro && (
+          <div className={styles.periodo}>
+            <button
+              type="button"
+              className={styles.navBtn}
+              onClick={() => irParaIndice(indicePeriodo - 1)}
+              disabled={!podeVoltar}
+              aria-label="Mês anterior"
+              title="Mês anterior"
+            >
+              <FontAwesomeIcon icon={icons.chevronLeft} />
+            </button>
 
-          <label className={styles.periodoCampo} htmlFor="dashboard-periodo">
-            <FontAwesomeIcon icon={icons.calendarDays} aria-hidden="true" />
-            <span className={styles.somenteLeitor}>Mês e ano</span>
-            <input
-              id="dashboard-periodo"
-              className={styles.periodInput}
-              type="month"
-              min="0001-01"
-              max="9999-12"
-              value={valorPeriodo}
-              onChange={(event) => alterarPeriodo(event.target.value)}
-              required
+            <SeletorPeriodo
+              ano={periodo.ano}
+              mes={periodo.mes}
+              indiceMaximo={indiceAtual}
+              onChange={(ano, mes) => irParaIndice(ano * 12 + (mes - 1))}
             />
-          </label>
 
-          <button
-            type="button"
-            className={styles.navBtn}
-            onClick={() => irParaIndice(indicePeriodo + 1)}
-            disabled={!podeAvancar}
-            aria-label="Próximo mês"
-            title="Próximo mês"
-          >
-            <FontAwesomeIcon icon={icons.chevronRight} />
-          </button>
-        </div>
+            <button
+              type="button"
+              className={styles.navBtn}
+              onClick={() => irParaIndice(indicePeriodo + 1)}
+              disabled={!podeAvancar}
+              aria-label="Próximo mês"
+              title="Próximo mês"
+            >
+              <FontAwesomeIcon icon={icons.chevronRight} />
+            </button>
+          </div>
+        )}
 
-        {!ehMesAtual && (
+        {podeVerFinanceiro && !ehMesAtual && (
           <button type="button" className={styles.chip} onClick={() => irParaIndice(indiceAtual)}>
             <FontAwesomeIcon icon={icons.calendarDay} /> Mês atual
           </button>
@@ -250,7 +339,12 @@ export function DashboardPage() {
           title="Recarrega os indicadores a cada 60 segundos"
         >
           <FontAwesomeIcon icon={icons.bolt} /> Atualização automática
-          {autoAtualizar && <span className={styles.pulso} aria-hidden="true" />}
+          {autoAtualizar && (
+            <>
+              <span className={styles.pulso} aria-hidden="true" />
+              <span className={styles.contagem}>{restante}s</span>
+            </>
+          )}
         </button>
 
         <span className={styles.espaco} />
@@ -262,15 +356,17 @@ export function DashboardPage() {
           </span>
         )}
 
-        <button
-          type="button"
-          className={styles.chip}
-          onClick={exportarResumo}
-          disabled={!geral}
-          title="Baixar os indicadores do período em CSV"
-        >
-          <FontAwesomeIcon icon={icons.download} /> Exportar resumo
-        </button>
+        {podeVerFinanceiro && (
+          <button
+            type="button"
+            className={styles.chip}
+            onClick={exportarResumo}
+            disabled={!geral}
+            title="Baixar os indicadores do período em CSV"
+          >
+            <FontAwesomeIcon icon={icons.download} /> Exportar resumo
+          </button>
+        )}
 
         <button
           type="button"
@@ -283,7 +379,12 @@ export function DashboardPage() {
         </button>
       </div>
 
-      {carregando && (
+      <div
+        className={`${styles.progresso} ${ocupado ? styles.progressoAtivo : ""}`}
+        aria-hidden="true"
+      />
+
+      {podeVerFinanceiro && carregando && (
         <>
           <p className={styles.somenteLeitor} role="status">
             Carregando indicadores...
@@ -292,7 +393,7 @@ export function DashboardPage() {
         </>
       )}
 
-      {!carregando && erro && (
+      {podeVerFinanceiro && !carregando && erro && (
         <div className={styles.errorBox} role="alert">
           <FontAwesomeIcon icon={icons.error} className={styles.errorIcon} />
           <p>
@@ -307,7 +408,7 @@ export function DashboardPage() {
         </div>
       )}
 
-      {!carregando && atual && geral && (
+      {podeVerFinanceiro && !carregando && atual && geral && (
         <>
           <ResumoPeriodo
             nomePeriodo={nomePeriodo}
@@ -431,83 +532,7 @@ export function DashboardPage() {
             </SecaoDashboard>
           )}
 
-          <SecaoDashboard
-            id="sec-frota"
-            icone={icons.truck}
-            titulo="Frota e cadastro"
-            dica="Mesma base da tela de Motoristas — atualizada a cada importação de CSV."
-          >
-            {carregandoFrota && cadastrados.length === 0 ? (
-              <div className={styles.frotaCarregando} aria-hidden="true" />
-            ) : erroFrota && cadastrados.length === 0 ? (
-              <div className={styles.frotaErro} role="alert">
-                <span>{erroFrota}</span>
-                <button type="button" className={styles.chip} onClick={recarregarFrota}>
-                  <FontAwesomeIcon icon={icons.retry} /> Tentar novamente
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className={`${styles.grid} ${styles.gridFrota}`}>
-                  <KpiCard
-                    indice={0}
-                    titulo="Motoristas cadastrados"
-                    valor={frota.totalMotoristas}
-                    formato="inteiro"
-                    icone={icons.idCard}
-                    cor="brand"
-                    descricao={`${inteiro.format(cadastradosComViagem)} com viagens em ${nomePeriodo} · ${inteiro.format(cadastradosSemViagem)} sem viagens no período.`}
-                  />
-
-                  <KpiCard
-                    indice={1}
-                    titulo="Veículos na frota"
-                    valor={frota.veiculos.length}
-                    formato="inteiro"
-                    icone={icons.truck}
-                    cor="cyan"
-                    descricao={`${inteiro.format(frota.quantidadeTipos)} ${
-                      frota.quantidadeTipos === 1 ? "tipo" : "tipos"
-                    } de veículo${
-                      frota.motoristasSemVeiculo > 0
-                        ? ` · ${inteiro.format(frota.motoristasSemVeiculo)} ${
-                            frota.motoristasSemVeiculo === 1 ? "motorista" : "motoristas"
-                          } sem veículo`
-                        : ""
-                    }.`}
-                  />
-
-                  <KpiCard
-                    indice={2}
-                    titulo="Em operação"
-                    valor={frota.emOperacao}
-                    formato="inteiro"
-                    icone={icons.route}
-                    cor="amber"
-                    descricao={`${decimal1.format(pctOperacao)}% dos motoristas cadastrados.`}
-                  />
-
-                  <KpiCard
-                    indice={3}
-                    titulo="Disponíveis"
-                    valor={frota.disponiveis}
-                    formato="inteiro"
-                    icone={icons.success}
-                    cor="green"
-                    descricao="Prontos para novas viagens."
-                  />
-                </div>
-
-                <div className={styles.frotaTipos}>
-                  <FrotaPorTipo
-                    frota={frota}
-                    porVeiculo={atual.porVeiculo ?? []}
-                    nomePeriodo={nomePeriodo}
-                  />
-                </div>
-              </>
-            )}
-          </SecaoDashboard>
+          {secaoFrota}
 
           <SecaoDashboard
             id="sec-composicao"
@@ -534,6 +559,21 @@ export function DashboardPage() {
               {ant ? " As variações comparam com o mês anterior." : ""} Os totais de motoristas e
               veículos vêm do cadastro (mesma base da tela de Motoristas); o comparativo inclui
               quem não teve viagens no mês.
+            </span>
+          </p>
+        </>
+      )}
+
+      {!podeVerFinanceiro && (
+        <>
+          {secaoFrota}
+
+          <p className={styles.note}>
+            <FontAwesomeIcon icon={icons.info} aria-hidden="true" />
+            <span>
+              Os totais de motoristas e veículos vêm do cadastro (mesma base da tela de
+              Motoristas) e se atualizam a cada importação de CSV. Os indicadores financeiros ficam
+              restritos ao perfil de gestor.
             </span>
           </p>
         </>

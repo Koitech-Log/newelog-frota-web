@@ -141,7 +141,11 @@ export function RentabilidadeMedia({ dados, cadastrados, frota }: RentabilidadeM
 
     return (
       <th scope="col" aria-sort={sentido}>
-        <button type="button" className={styles.sortBtn} onClick={() => alternarOrdem(chave)}>
+        <button
+          type="button"
+          className={`${styles.sortBtn} ${ativa ? styles.sortBtnAtivo : ""}`}
+          onClick={() => alternarOrdem(chave)}
+        >
           {rotulo}
           <span
             className={`${styles.seta} ${ativa ? styles.setaAtiva : ""} ${

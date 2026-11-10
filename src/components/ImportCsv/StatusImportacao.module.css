@@ -1,0 +1,193 @@
+.status {
+  --accent: var(--green);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  overflow: hidden;
+  background: linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--accent) 14%, transparent),
+      transparent 70%
+    ),
+    var(--surface-0);
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  border-radius: 14px;
+  animation: entrar 0.45s var(--ease-out) backwards;
+}
+
+.success {
+  --accent: var(--green);
+}
+
+.warning {
+  --accent: var(--star);
+}
+
+.error {
+  --accent: var(--red);
+  animation:
+    entrar 0.45s var(--ease-out) backwards,
+    tremer 0.4s var(--ease-out) 0.2s;
+}
+
+.selo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 18px;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 38%, transparent);
+  animation: pop 0.5s var(--ease-out) 0.1s backwards;
+}
+
+/* anel que se expande uma vez ao concluir */
+.selo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  animation: anel 1s ease-out 0.35s;
+  opacity: 0;
+}
+
+.check {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: desenhar 0.45s var(--ease-out) 0.3s forwards;
+}
+
+.texto {
+  min-width: 0;
+  flex: 1;
+}
+
+.titulo {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.descricao {
+  margin: 3px 0 0;
+  color: var(--ink-dim);
+  font-size: 12.5px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+.progresso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.trilho {
+  flex: 1;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface-2));
+}
+
+.barra {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 65%, #fff));
+  animation: crescer 1s var(--ease-out) 0.3s backwards;
+}
+
+.pct {
+  min-width: 36px;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4) rotate(-15deg);
+  }
+}
+
+@keyframes desenhar {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes anel {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+@keyframes crescer {
+  from {
+    width: 0;
+  }
+}
+
+@keyframes tremer {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status,
+  .selo,
+  .barra {
+    animation: none;
+  }
+
+  .selo::after {
+    display: none;
+  }
+
+  .check {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}

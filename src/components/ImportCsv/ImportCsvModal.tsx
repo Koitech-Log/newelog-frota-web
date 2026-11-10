@@ -6,6 +6,9 @@ import { useImportarVeiculos } from "../../hooks/useImportarVeiculos";
 import { TAMANHO_MAXIMO_BYTES, formatarTamanho, plural } from "../../utils/arquivoCsv";
 import { AlertaMotoristasNaoEncontrados } from "../Alert/AlertaMotoristasNaoEncontrados";
 import { AlertaErrosImportacaoVeiculos } from "../Alert/AlertaErrosImportacaoVeiculos";
+import { Alert } from "../Alert/Alert";
+import { StatusImportacao, type VarianteStatus } from "./StatusImportacao";
+import { EstatisticasImportacao } from "./EstatisticasImportacao";
 import { SeletorImportacao, type TipoImportacao } from "../SeletorImportacao";
 import styles from "./ImportCsvModal.module.css";
 
@@ -186,16 +189,25 @@ export function ImportCsvModal({
 
   // Nada foi importado (ex.: todas as linhas rejeitadas) conta como falha.
   const nadaImportado = !!resumo && resumo.importadas === 0;
-  const statusSucesso = estado === "sucesso";
-  const statusClasse = nadaImportado ? styles.error : statusSucesso ? styles.success : styles.atencao;
-  const statusIcone = nadaImportado ? icons.error : statusSucesso ? icons.success : icons.warning;
-  const statusTexto = nadaImportado
-    ? "Nenhuma linha foi importada."
-    : statusSucesso
-      ? "Importação concluída."
+  const variante: VarianteStatus = nadaImportado
+    ? "error"
+    : estado === "sucesso"
+      ? "success"
+      : "warning";
+  const tituloStatus = nadaImportado
+    ? "Nenhuma linha foi importada"
+    : estado === "sucesso"
+      ? "Importação concluída"
       : tipo === "manifesto"
-        ? "Importação concluída — há motoristas novos para validar."
-        : "Importação concluída — algumas linhas foram rejeitadas.";
+        ? "Importação concluída — há motoristas novos para validar"
+        : "Importação concluída — algumas linhas foram rejeitadas";
+  const descricaoStatus = !resumo
+    ? undefined
+    : tipo === "veiculos" && veiculos.resultado
+      ? `${veiculos.resultado.cadastrados} cadastrados · ${veiculos.resultado.atualizados} já existentes · ${veiculos.resultado.rejeitados} com erro`
+      : `${resumo.importadas} de ${resumo.lidas} ${plural(resumo.lidas, "linha importada", "linhas importadas")}${
+          resumo.rejeitadas > 0 ? ` · ${resumo.rejeitadas} ${plural(resumo.rejeitadas, "rejeitada", "rejeitadas")}` : ""
+        }`;
 
   const motivoRejeicao = tipo === "manifesto" ? " por CPF/CNPJ inválido" : "";
 
@@ -342,9 +354,12 @@ export function ImportCsvModal({
           )}
 
           {estado === "erro" && (
-            <div className={`${styles.status} ${styles.error}`} role="alert">
-              <FontAwesomeIcon icon={icons.error} />
-              <span>{mensagemErro}</span>
+            <div className={styles.avisoErro}>
+              <StatusImportacao
+                variante="error"
+                titulo={arquivo ? "Falha na importação" : "Arquivo não aceito"}
+                descricao={mensagemErro ?? undefined}
+              />
             </div>
           )}
 
@@ -357,52 +372,71 @@ export function ImportCsvModal({
 
           {concluido && resumo && (
             <div className={styles.result} aria-live="polite">
-              <div className={`${styles.status} ${statusClasse}`}>
-                <FontAwesomeIcon icon={statusIcone} />
-                <span>{statusTexto}</span>
-              </div>
+              <StatusImportacao
+                variante={variante}
+                titulo={tituloStatus}
+                descricao={descricaoStatus}
+                progresso={{ valor: resumo.importadas, total: resumo.lidas }}
+              />
 
               {tipo === "veiculos" && veiculos.resultado ? (
-                <dl className={styles.stats}>
-                  <div className={`${styles.stat} ${styles.statOk}`}>
-                    <dd>{veiculos.resultado.cadastrados}</dd>
-                    <dt>{plural(veiculos.resultado.cadastrados, "cadastrado", "cadastrados")}</dt>
-                  </div>
-                  <div className={styles.stat}>
-                    <dd>{veiculos.resultado.atualizados}</dd>
-                    <dt>{plural(veiculos.resultado.atualizados, "já existente", "já existentes")}</dt>
-                  </div>
-                  <div className={`${styles.stat} ${veiculos.resultado.rejeitados > 0 ? styles.statErr : ""}`}>
-                    <dd>{veiculos.resultado.rejeitados}</dd>
-                    <dt>com erro</dt>
-                  </div>
-                </dl>
+                <EstatisticasImportacao
+                  itens={[
+                    {
+                      rotulo: plural(veiculos.resultado.cadastrados, "cadastrado", "cadastrados"),
+                      valor: veiculos.resultado.cadastrados,
+                      tom: "ok",
+                      icone: icons.truck,
+                    },
+                    {
+                      rotulo: plural(veiculos.resultado.atualizados, "já existente", "já existentes"),
+                      valor: veiculos.resultado.atualizados,
+                      tom: "neutro",
+                      icone: icons.retry,
+                    },
+                    {
+                      rotulo: "com erro",
+                      valor: veiculos.resultado.rejeitados,
+                      tom: veiculos.resultado.rejeitados > 0 ? "erro" : "neutro",
+                      icone: icons.error,
+                    },
+                  ]}
+                />
               ) : (
-                <dl className={styles.stats}>
-                  <div className={styles.stat}>
-                    <dd>{resumo.lidas}</dd>
-                    <dt>{plural(resumo.lidas, "linha lida", "linhas lidas")}</dt>
-                  </div>
-                  <div className={`${styles.stat} ${styles.statOk}`}>
-                    <dd>{resumo.importadas}</dd>
-                    <dt>{plural(resumo.importadas, "importado", "importados")}</dt>
-                  </div>
-                  <div className={`${styles.stat} ${resumo.rejeitadas > 0 ? styles.statErr : ""}`}>
-                    <dd>{resumo.rejeitadas}</dd>
-                    <dt>{plural(resumo.rejeitadas, "rejeitada", "rejeitadas")}</dt>
-                  </div>
-                </dl>
+                <EstatisticasImportacao
+                  itens={[
+                    {
+                      rotulo: plural(resumo.lidas, "linha lida", "linhas lidas"),
+                      valor: resumo.lidas,
+                      tom: "neutro",
+                      icone: icons.fileCsv,
+                    },
+                    {
+                      rotulo: plural(resumo.importadas, "importado", "importados"),
+                      valor: resumo.importadas,
+                      tom: "ok",
+                      icone: icons.success,
+                    },
+                    {
+                      rotulo: plural(resumo.rejeitadas, "rejeitada", "rejeitadas"),
+                      valor: resumo.rejeitadas,
+                      tom: resumo.rejeitadas > 0 ? "erro" : "neutro",
+                      icone: icons.error,
+                    },
+                  ]}
+                />
               )}
 
               {tipo === "manifesto" && resumo.rejeitadas > 0 && (
-                <p className={styles.rejeitadosNote}>
-                  <FontAwesomeIcon icon={icons.error} />
-                  <span>
-                    {resumo.rejeitadas}{" "}
-                    {plural(resumo.rejeitadas, "linha foi rejeitada", "linhas foram rejeitadas")}
-                    {motivoRejeicao}. Corrija no arquivo e importe novamente.
-                  </span>
-                </p>
+                <Alert
+                  variante="error"
+                  titulo={`${resumo.rejeitadas} ${plural(
+                    resumo.rejeitadas,
+                    "linha rejeitada",
+                    "linhas rejeitadas"
+                  )}${motivoRejeicao}`}
+                  descricao="Corrija no arquivo e importe novamente."
+                />
               )}
 
               {tipo === "veiculos" && veiculos.resultado && (

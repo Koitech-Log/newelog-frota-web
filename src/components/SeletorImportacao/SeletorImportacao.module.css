@@ -3,7 +3,7 @@
   gap: 4px;
   padding: 3px;
   margin-bottom: 12px;
-  background: var(--surface-1);
+  background: var(--surface-2);
   border: 1px solid var(--line-faint);
   border-radius: 12px;
 }
@@ -18,20 +18,22 @@
   border-radius: 9px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--ink-dim);
+  color: var(--ink);
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
 .opcao:hover:not(:disabled):not(.ativa) {
   color: var(--ink);
-  background: var(--surface-2);
+  background: var(--surface-3);
 }
 
 .opcao.ativa {
-  background: var(--brand-soft);
-  color: var(--brand);
+  background: linear-gradient(135deg, var(--btn, var(--brand)), var(--btn-bright, var(--brand-bright)));
+  color: #fff;
   cursor: default;
+  border-color: var(--btn, var(--brand));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--btn, var(--brand)) 32%, transparent);
 }
 
 .opcao:disabled {

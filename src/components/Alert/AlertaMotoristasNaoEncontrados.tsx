@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../icons";
 import { Alert } from "./Alert";
@@ -27,7 +28,7 @@ export function AlertaMotoristasNaoEncontrados({
         >
             <div className={styles.lista}>
                 {motoristas.map((motorista, indice) => (
-                    <div key={indice} className={styles.item}>
+                    <div key={indice} className={styles.item} style={{ "--i": indice } as CSSProperties}>
                         <FontAwesomeIcon icon={icons.userPlus} className={styles.itemIcon} />
                         <span className={styles.itemNome}>{motorista.nome}</span>
                         <span className={styles.itemMeta}>{motorista.placaVeiculo ?? "sem veículo"}</span>

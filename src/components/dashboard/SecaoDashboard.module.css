@@ -1,6 +1,15 @@
 .secao {
   margin-top: 34px;
-  animation: entrada 0.5s var(--ease-out) 0.2s backwards;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s var(--ease-out),
+    transform 0.6s var(--ease-out);
+}
+
+.visivel {
+  opacity: 1;
+  transform: none;
 }
 
 .cabecalho {
@@ -37,15 +46,10 @@
   line-height: 1.4;
 }
 
-@keyframes entrada {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .secao {
-    animation: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
