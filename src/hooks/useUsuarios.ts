@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ApiRequestError } from "../api/client";
 import { usuariosApi, type Usuario } from "../api/usuarios";
 import type { Perfil } from "../context/ProfileContext";
@@ -38,10 +38,12 @@ export function useUsuarios(busca: string, perfil: Perfil | "") {
     return () => controller.abort();
   }, [busca, perfil, tentativa]);
 
-  return {
-    usuarios,
-    carregando,
-    erro,
-    recarregar: () => setTentativa((atual) => atual + 1),
-  };
+  /** Troca um usuário na lista já carregada (ex.: depois de ativar/desativar). */
+  const substituir = useCallback((atualizado: Usuario) => {
+    setUsuarios((lista) => lista.map((u) => (u.id === atualizado.id ? atualizado : u)));
+  }, []);
+
+  const recarregar = useCallback(() => setTentativa((atual) => atual + 1), []);
+
+  return { usuarios, carregando, erro, recarregar, substituir };
 }

@@ -7,6 +7,17 @@ export interface Usuario {
   email: string;
   perfil: Perfil;
   ativo: boolean;
+  /** true enquanto o usuário não trocou a senha inicial definida pelo gestor. */
+  mustChangePassword: boolean;
+  criadoEm: string | null;
+  ultimoLoginEm: string | null;
+}
+
+export interface NovoUsuario {
+  nome: string;
+  email: string;
+  senha: string;
+  perfil: Perfil;
 }
 
 interface FiltrosUsuario {
@@ -26,5 +37,15 @@ export const usuariosApi = {
     const path = query ? `/api/usuarios?${query}` : "/api/usuarios";
 
     return authApiClient.get<Usuario[]>(path, signal);
+  },
+
+  /** Cadastro pelo gestor (POST /api/usuarios). A senha informada é temporária. */
+  criar(dados: NovoUsuario) {
+    return authApiClient.post<Usuario>("/api/usuarios", dados);
+  },
+
+  /** Ativa ou desativa o acesso (PATCH /api/usuarios/{id}/ativo). */
+  atualizarAtivo(id: number, ativo: boolean) {
+    return authApiClient.patch<Usuario>(`/api/usuarios/${id}/ativo`, { ativo });
   },
 };
