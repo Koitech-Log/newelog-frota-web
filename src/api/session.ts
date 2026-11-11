@@ -31,6 +31,11 @@ export function limparSessao(): void {
   sessionStorage.removeItem(CHAVE);
 }
 
+export function atualizarSessao(sessao: LoginResponse): void {
+  const storage = localStorage.getItem(CHAVE) !== null ? localStorage : sessionStorage;
+  storage.setItem(CHAVE, JSON.stringify(sessao));
+}
+
 export function lerToken(): string | null {
   return lerSessao()?.token ?? null;
 }

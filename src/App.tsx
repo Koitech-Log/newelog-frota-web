@@ -12,6 +12,7 @@ import { ImportManifestoProvider } from "./context/ImportManifestoContext";
 import { FrotaProvider, useFrota } from "./context/FrotaContext";
 import { ImportCsvProvider, useImportCsv } from "./context/ImportCsvContext";
 import { UsuariosPage } from "./pages/UsuariosPage";
+import { TrocaSenhaPage } from "./pages/TrocaSenhaPage";
 
 function MobileTopbar({
   onAbrirMenu,
@@ -142,12 +143,13 @@ function Gate() {
     return <LoginPage />;
   }
 
+  if (sessao.mustChangePassword) {
+    return <TrocaSenhaPage />;
+  }
+
   // Ao trocar de usuário, o estado da área logada recomeça do zero.
   return (
-    <ProfileProvider
-      key={sessao.token}
-      perfil={sessao.perfil}
-    >
+    <ProfileProvider key={sessao.token} perfil={sessao.perfil}>
       <AppLogado />
     </ProfileProvider>
   );
