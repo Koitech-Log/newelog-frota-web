@@ -25,6 +25,15 @@ import {
   faLock,
   faArrowRightToBracket,
   faUsers,
+  faUserCheck,
+  faUserSlash,
+  faUserClock,
+  faKey,
+  faCopy,
+  faWandMagicSparkles,
+  faPlus,
+  faBan,
+  faCheck,
 
   // ==================== FROTA / VEÍCULOS ====================
   faTruck,
@@ -110,6 +119,15 @@ export const icons = {
   mail: faEnvelope,
   lock: faLock,
   signIn: faArrowRightToBracket,
+  userCheck: faUserCheck,
+  userSlash: faUserSlash,
+  userClock: faUserClock,
+  key: faKey,
+  copy: faCopy,
+  magic: faWandMagicSparkles,
+  plus: faPlus,
+  ban: faBan,
+  check: faCheck,
 
   // Frota
   truck: faTruck,

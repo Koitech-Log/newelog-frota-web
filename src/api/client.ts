@@ -79,4 +79,10 @@ export const apiClient = {
 export const authApiClient = {
   get: <T>(path: string, signal?: AbortSignal) =>
     request<T>(path, { method: "GET", signal }, AUTH_SERVICE_URL),
+
+  post: <T>(path: string, body: unknown) =>
+    request<T>(path, { method: "POST", body: JSON.stringify(body) }, AUTH_SERVICE_URL),
+
+  patch: <T>(path: string, body: unknown) =>
+    request<T>(path, { method: "PATCH", body: JSON.stringify(body) }, AUTH_SERVICE_URL),
 };
