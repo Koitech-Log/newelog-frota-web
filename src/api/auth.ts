@@ -1,7 +1,8 @@
 import type { Perfil } from "../context/ProfileContext";
 
 // newelog-auth-service (POST /api/auth/login). Contrato no README daquele serviço.
-const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL ?? "http://localhost:8082";
+export const AUTH_SERVICE_URL =
+  import.meta.env.VITE_AUTH_SERVICE_URL ?? "http://localhost:8082";
 
 export interface LoginResponse {
   token: string;

@@ -18,7 +18,13 @@ export function chavePeriodo(ano: number, mes: number) {
  * continuam na tela; ao trocar de período, `dados` fica indisponível até
  * a resposta chegar.
  */
-export function useDashboard(ano: number, mes: number, gatilhoExterno: number) {
+export function useDashboard(
+  ano: number,
+  mes: number,
+  gatilhoExterno: number,
+  /** Desligado para perfis sem acesso aos valores financeiros: nada é buscado. */
+  habilitado = true
+) {
   const [dados, setDados] = useState<DadosDoPeriodo | null>(null);
   const [buscando, setBuscando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -28,6 +34,8 @@ export function useDashboard(ano: number, mes: number, gatilhoExterno: number) {
   const recarregar = useCallback(() => setTick((valor) => valor + 1), []);
 
   useEffect(() => {
+    if (!habilitado) return;
+
     let cancelado = false;
     const chave = chavePeriodo(ano, mes);
     const [anoAnterior, mesAnterior] = mes === 1 ? [ano - 1, 12] : [ano, mes - 1];
@@ -59,7 +67,7 @@ export function useDashboard(ano: number, mes: number, gatilhoExterno: number) {
     return () => {
       cancelado = true;
     };
-  }, [ano, mes, tick, gatilhoExterno]);
+  }, [ano, mes, tick, gatilhoExterno, habilitado]);
 
   const doPeriodo = dados && dados.chave === chavePeriodo(ano, mes) ? dados : null;
 
@@ -67,9 +75,9 @@ export function useDashboard(ano: number, mes: number, gatilhoExterno: number) {
     atual: doPeriodo?.atual ?? null,
     anterior: doPeriodo?.anterior ?? null,
     /** Primeira carga do período (sem nada para mostrar ainda). */
-    carregando: buscando && !doPeriodo,
+    carregando: habilitado && buscando && !doPeriodo,
     /** Recarga em segundo plano com dados já na tela. */
-    atualizando: buscando && !!doPeriodo,
+    atualizando: habilitado && buscando && !!doPeriodo,
     erro,
     atualizadoEm,
     recarregar,

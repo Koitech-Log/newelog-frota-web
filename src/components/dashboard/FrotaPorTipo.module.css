@@ -247,22 +247,26 @@
   align-items: center;
   gap: 8px;
   margin-top: 14px;
-  padding: 7px 14px;
-  border: 1px solid var(--line-faint);
+  padding: 7px 15px;
+  border: 1px solid var(--btn, var(--brand));
   border-radius: 999px;
-  background: var(--surface-0);
-  color: var(--ink-dim);
+  background: linear-gradient(135deg, var(--btn, var(--brand)), var(--btn-bright, var(--brand-bright)));
+  color: #fff;
   font: inherit;
   font-size: 12.5px;
+  font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--btn, var(--brand)) 32%, transparent);
   transition:
-    border-color 0.2s ease,
-    color 0.2s ease;
+    filter 0.2s ease,
+    transform 0.15s var(--ease-out),
+    box-shadow 0.2s ease;
 }
 
 .alternar:hover {
-  border-color: var(--brand-dim);
-  color: var(--ink);
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--btn, var(--brand)) 40%, transparent);
 }
 
 .alternar:focus-visible {

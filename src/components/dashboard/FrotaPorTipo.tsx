@@ -15,6 +15,8 @@ interface FrotaPorTipoProps {
   frota: ResumoFrota;
   porVeiculo: RentabilidadeMediaItem[];
   nomePeriodo: string;
+  /** false para perfis sem acesso a valores/viagens do período: mostra só a frota. */
+  mostrarDesempenho?: boolean;
 }
 
 function pct(parte: number, total: number) {
@@ -26,7 +28,12 @@ function rotuloStatus(status: string) {
 }
 
 /** Um cartão por tipo de veículo: tamanho da frota, ocupação e desempenho no período. */
-export function FrotaPorTipo({ frota, porVeiculo, nomePeriodo }: FrotaPorTipoProps) {
+export function FrotaPorTipo({
+  frota,
+  porVeiculo,
+  nomePeriodo,
+  mostrarDesempenho = true,
+}: FrotaPorTipoProps) {
   const [aberto, setAberto] = useState<string | null>(null);
   const porPlaca = useMemo(() => desempenhoPorPlaca(porVeiculo), [porVeiculo]);
   const totalVeiculos = frota.veiculos.length;
@@ -63,6 +70,7 @@ export function FrotaPorTipo({ frota, porVeiculo, nomePeriodo }: FrotaPorTipoPro
             totalVeiculos={totalVeiculos}
             nomePeriodo={nomePeriodo}
             porPlaca={porPlaca}
+            mostrarDesempenho={mostrarDesempenho}
             expandido={aberto === tipo.chave}
             onAlternar={() => setAberto((atual) => (atual === tipo.chave ? null : tipo.chave))}
           />
@@ -78,6 +86,7 @@ interface CartaoTipoProps {
   totalVeiculos: number;
   nomePeriodo: string;
   porPlaca: Map<string, RentabilidadeMediaItem>;
+  mostrarDesempenho: boolean;
   expandido: boolean;
   onAlternar: () => void;
 }
@@ -88,6 +97,7 @@ function CartaoTipo({
   totalVeiculos,
   nomePeriodo,
   porPlaca,
+  mostrarDesempenho,
   expandido,
   onAlternar,
 }: CartaoTipoProps) {
@@ -117,7 +127,7 @@ function CartaoTipo({
         <span className={styles.barraFrota} style={{ "--w": `${Math.max(parteDaFrota, 3)}%` } as CSSProperties} />
       </div>
 
-      <dl className={styles.numeros}>
+      <dl className={`${styles.numeros} ${mostrarDesempenho ? "" : styles.numeros2}`}>
         <div>
           <dd>{inteiro.format(tipo.veiculos.length)}</dd>
           <dt>{tipo.veiculos.length === 1 ? "veículo" : "veículos"}</dt>
@@ -126,13 +136,15 @@ function CartaoTipo({
           <dd>{inteiro.format(tipo.motoristas)}</dd>
           <dt>{tipo.motoristas === 1 ? "motorista" : "motoristas"}</dt>
         </div>
-        <div>
-          <dd>
-            {inteiro.format(desempenho.veiculosAtivos)}
-            <span className={styles.de}>/{inteiro.format(tipo.veiculos.length)}</span>
-          </dd>
-          <dt>com viagens</dt>
-        </div>
+        {mostrarDesempenho && (
+          <div>
+            <dd>
+              {inteiro.format(desempenho.veiculosAtivos)}
+              <span className={styles.de}>/{inteiro.format(tipo.veiculos.length)}</span>
+            </dd>
+            <dt>com viagens</dt>
+          </div>
+        )}
       </dl>
 
       <div
@@ -154,33 +166,35 @@ function CartaoTipo({
         </span>
       </p>
 
-      <div className={styles.periodo}>
-        {semDesempenho ? (
-          <p className={styles.semViagens}>Sem viagens em {nomePeriodo}.</p>
-        ) : (
-          <>
-            <p className={styles.periodoTitulo}>Em {nomePeriodo}</p>
-            <ul className={styles.metricas}>
-              <li>
-                <span>Viagens</span>
-                <strong>{inteiro.format(desempenho.viagens)}</strong>
-              </li>
-              <li>
-                <span>Média por viagem</span>
-                <strong className={desempenho.media < 0 ? styles.negativo : styles.positivo}>
-                  {moeda.format(desempenho.media)}
-                </strong>
-              </li>
-              <li>
-                <span>Rentabilidade</span>
-                <strong className={desempenho.rentabilidade < 0 ? styles.negativo : styles.positivo}>
-                  {moeda.format(desempenho.rentabilidade)}
-                </strong>
-              </li>
-            </ul>
-          </>
-        )}
-      </div>
+      {mostrarDesempenho && (
+        <div className={styles.periodo}>
+          {semDesempenho ? (
+            <p className={styles.semViagens}>Sem viagens em {nomePeriodo}.</p>
+          ) : (
+            <>
+              <p className={styles.periodoTitulo}>Em {nomePeriodo}</p>
+              <ul className={styles.metricas}>
+                <li>
+                  <span>Viagens</span>
+                  <strong>{inteiro.format(desempenho.viagens)}</strong>
+                </li>
+                <li>
+                  <span>Média por viagem</span>
+                  <strong className={desempenho.media < 0 ? styles.negativo : styles.positivo}>
+                    {moeda.format(desempenho.media)}
+                  </strong>
+                </li>
+                <li>
+                  <span>Rentabilidade</span>
+                  <strong className={desempenho.rentabilidade < 0 ? styles.negativo : styles.positivo}>
+                    {moeda.format(desempenho.rentabilidade)}
+                  </strong>
+                </li>
+              </ul>
+            </>
+          )}
+        </div>
+      )}
 
       {tipo.veiculos.length > 0 && (
         <>
@@ -206,8 +220,8 @@ function CartaoTipo({
                   <tr>
                     <th scope="col">Placa</th>
                     <th scope="col">Motorista</th>
-                    <th scope="col">Viagens</th>
-                    <th scope="col">Média</th>
+                    {mostrarDesempenho && <th scope="col">Viagens</th>}
+                    {mostrarDesempenho && <th scope="col">Média</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -232,10 +246,12 @@ function CartaoTipo({
                             {rotuloStatus(principal?.status ?? "DISPONIVEL")}
                           </span>
                         </td>
-                        <td>{inteiro.format(viagens)}</td>
-                        <td className={item && item.rentabilidadeMedia < 0 ? styles.negativo : undefined}>
-                          {viagens > 0 && item ? moeda.format(item.rentabilidadeMedia) : "—"}
-                        </td>
+                        {mostrarDesempenho && <td>{inteiro.format(viagens)}</td>}
+                        {mostrarDesempenho && (
+                          <td className={item && item.rentabilidadeMedia < 0 ? styles.negativo : undefined}>
+                            {viagens > 0 && item ? moeda.format(item.rentabilidadeMedia) : "—"}
+                          </td>
+                        )}
                       </tr>
                     );
                   })}

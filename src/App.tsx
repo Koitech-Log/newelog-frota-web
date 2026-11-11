@@ -11,6 +11,7 @@ import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { ImportManifestoProvider } from "./context/ImportManifestoContext";
 import { FrotaProvider, useFrota } from "./context/FrotaContext";
 import { ImportCsvProvider, useImportCsv } from "./context/ImportCsvContext";
+import { UsuariosPage } from "./pages/UsuariosPage";
 
 function MobileTopbar({
   onAbrirMenu,
@@ -76,10 +77,10 @@ function MobileTopbar({
 
 /** Layout da área logada: menu lateral com os totais + a página selecionada. */
 function Layout() {
-  const { podeVerFinanceiro } = useProfile();
+  const { perfil, podeVerFinanceiro } = useProfile();
 
   const [paginaAtiva, setPaginaAtiva] = useState<
-    "home" | "drivers"
+    "home" | "drivers" | "usuarios"
   >("drivers");
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -106,7 +107,9 @@ function Layout() {
 
         {/* Exibe a página selecionada no menu */}
         <main className="main">
-          {paginaAtiva === "home" && podeVerFinanceiro ? (
+          {paginaAtiva === "usuarios" && perfil === "gestor" ? (
+            <UsuariosPage />
+          ) : paginaAtiva === "home" && podeVerFinanceiro ? (
             <DashboardPage />
           ) : (
             <DriversPage />

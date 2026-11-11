@@ -54,8 +54,12 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 22px;
-  opacity: 0;
-  animation: fadeInUp 0.5s var(--ease-out) 0.18s forwards;
+  /* acima dos cards: o calendário abre por cima deles */
+  position: relative;
+  z-index: 40;
+  /* "backwards": nada fica aplicado depois da animação (sem contexto de empilhamento
+     nem transform preso, que atrapalhariam o calendário) */
+  animation: fadeInUp 0.5s var(--ease-out) 0.18s backwards;
 }
 
 .periodo {
@@ -64,7 +68,7 @@
   gap: 2px;
   padding: 3px;
   background: var(--surface-0);
-  border: 1px solid var(--line-faint);
+  border: 1px solid var(--line);
   border-radius: 20px;
   transition:
     border-color 0.2s ease,
@@ -76,22 +80,22 @@
   box-shadow: 0 0 0 3px var(--brand-soft);
 }
 
+/* as setas dos meses são os botões principais da pílula: azul sólido */
 .navBtn {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  color: var(--ink-dim);
+  background: linear-gradient(135deg, var(--btn), var(--btn-bright));
+  color: #fff;
   font-size: 12px;
   cursor: pointer;
   transition:
-    background 0.2s ease,
-    color 0.2s ease,
+    filter 0.2s ease,
     transform 0.15s var(--ease-out);
 }
 
 .navBtn:hover:not(:disabled) {
-  background: var(--surface-2);
-  color: var(--ink);
+  filter: brightness(1.12);
 }
 
 .navBtn:active:not(:disabled) {
@@ -110,33 +114,6 @@
   outline-offset: 2px;
 }
 
-.periodoCampo {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 4px;
-  color: var(--ink-faint);
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.periodInput {
-  min-width: 140px;
-  padding: 6px 0;
-  border: none;
-  outline: none;
-  background: none;
-  color: var(--ink);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  color-scheme: light;
-}
-
-:global(:root[data-theme="dark"]) .periodInput {
-  color-scheme: dark;
-}
-
 .chip {
   display: inline-flex;
   align-items: center;
@@ -144,21 +121,26 @@
   padding: 7.5px 15px;
   border: 1px solid var(--line-faint);
   border-radius: 20px;
-  background: var(--surface-0);
-  color: var(--ink-dim);
+  background: var(--surface-2);
+  color: var(--ink);
   font-family: var(--font-body);
   font-size: 12.5px;
+  font-weight: 500;
   cursor: pointer;
   transition:
     transform 0.15s var(--ease-out),
     border-color 0.2s ease,
     color 0.2s ease,
     background 0.2s ease;
+  box-shadow: none;
 }
 
 .chip:hover:not(:disabled) {
-  border-color: var(--brand-dim);
+  border-color: var(--line);
+  background: var(--surface-3);
   color: var(--ink);
+  box-shadow: none;
+  filter: none;
 }
 
 .chip:active:not(:disabled) {
@@ -170,31 +152,49 @@
   cursor: not-allowed;
 }
 
+/* ligado: destaque azul suave */
 .chipAtivo {
   border-color: var(--brand);
   background: var(--brand-soft);
   color: var(--brand);
-}
-
-.chipAtivo:hover:not(:disabled) {
-  color: var(--brand);
-}
-
-.chipPrimario {
-  border-color: var(--brand);
-  background: var(--brand);
-  color: #fff;
   font-weight: 600;
 }
 
+.chipAtivo:hover:not(:disabled) {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+/* ação principal: azul sólido */
+.chipPrimario,
 .chipPrimario:hover:not(:disabled) {
-  background: var(--brand-bright);
-  border-color: var(--brand-bright);
+  border: 1px solid var(--btn);
+  background: linear-gradient(135deg, var(--btn), var(--btn-bright));
   color: #fff;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--btn) 30%, transparent);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.chipPrimario:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--btn, var(--brand)) 40%, transparent);
+  background: linear-gradient(135deg, var(--btn, var(--brand)), var(--btn-bright, var(--brand-bright)));
+  color: #fff;
+  border-color: var(--btn, var(--brand));
 }
 
 .chipPrimario:disabled {
   cursor: wait;
+}
+
+.contagem {
+  min-width: 26px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.9;
 }
 
 .pulso {
@@ -218,6 +218,31 @@
   font-size: 11.5px;
 }
 
+/* barra fina que corre sob a barra de ações enquanto algo é carregado */
+.progresso {
+  position: relative;
+  height: 3px;
+  margin: -10px 0 18px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: transparent;
+  transition: background 0.3s ease;
+}
+
+.progressoAtivo {
+  background: color-mix(in srgb, var(--brand) 14%, transparent);
+}
+
+.progressoAtivo::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--brand), var(--brand-bright));
+  animation: correr 1.1s ease-in-out infinite;
+}
+
 /* ---------- Conteúdo ---------- */
 .grid {
   display: grid;
@@ -226,7 +251,7 @@
 }
 
 .gridFrota {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .frotaTipos {
@@ -351,6 +376,15 @@
   }
 }
 
+@keyframes correr {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
 @keyframes pulso {
   0% {
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 55%, transparent);
@@ -374,8 +408,7 @@
 }
 
 @media (max-width: 1100px) {
-  .grid,
-  .gridFrota {
+  .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -391,11 +424,6 @@
   .periodo {
     flex: 1 1 100%;
     justify-content: space-between;
-  }
-
-  .periodoCampo {
-    flex: 1;
-    justify-content: center;
   }
 
   .navBtn {
@@ -428,7 +456,8 @@
 
   .errorBox,
   .pulso,
-  .frotaCarregando {
+  .frotaCarregando,
+  .progressoAtivo::after {
     animation: none;
   }
 
@@ -437,4 +466,11 @@
   .retryBtn {
     transition: none;
   }
+}
+
+.chipPrimario {
+  background: linear-gradient(135deg, var(--btn, var(--brand)), var(--btn-bright, var(--brand-bright)));
+  color: #fff;
+  border-color: var(--btn, var(--brand));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--btn, var(--brand)) 32%, transparent);
 }

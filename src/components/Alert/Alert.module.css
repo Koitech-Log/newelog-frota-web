@@ -1,44 +1,106 @@
 .alert {
-    border-radius: 10px;
-    padding: 14px 16px;
+    --accent: var(--brand);
+    padding: 13px 16px 13px 14px;
     font-size: 13px;
+    background: color-mix(in srgb, var(--accent) 7%, var(--surface-0));
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+    animation: entrar 0.4s var(--ease-out) backwards;
+}
+
+.warning {
+    --accent: var(--star);
+}
+
+.error {
+    --accent: var(--red);
+    animation:
+        entrar 0.4s var(--ease-out) backwards,
+        tremer 0.4s var(--ease-out) 0.15s;
+}
+
+.success {
+    --accent: var(--green);
+}
+
+.info {
+    --accent: var(--brand);
 }
 
 .head {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
-.icon {
-    font-size: 15px;
+.selo {
+    display: grid;
+    place-items: center;
     flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
+    font-size: 14px;
+    animation: pop 0.45s var(--ease-out) 0.1s backwards;
+}
+
+.textos {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
 }
 
 .titulo {
+    color: var(--ink);
     font-weight: 600;
+    line-height: 1.35;
+}
+
+.descricao {
+    color: var(--ink-dim);
+    font-size: 12.5px;
+    line-height: 1.45;
 }
 
 .body {
-    margin-top: 10px;
+    margin-top: 12px;
+    color: var(--ink);
 }
 
-.warning {
-    background: var(--amber-soft);
-    color: var(--amber-dim);
+@keyframes entrar {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
 }
 
-.error {
-    background: var(--red-soft);
-    color: var(--red);
+@keyframes pop {
+    from {
+        opacity: 0;
+        transform: scale(0.5) rotate(-12deg);
+    }
 }
 
-.success {
-    background: var(--green-soft);
-    color: var(--green);
+@keyframes tremer {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-4px);
+    }
+    75% {
+        transform: translateX(4px);
+    }
 }
 
-.info {
-    background: var(--surface-2);
-    color: var(--ink-dim);
+@media (prefers-reduced-motion: reduce) {
+    .alert,
+    .selo {
+        animation: none;
+    }
 }

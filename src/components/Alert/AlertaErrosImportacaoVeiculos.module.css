@@ -2,8 +2,8 @@
     max-height: 220px;
     overflow: auto;
     background: var(--surface-0);
-    border: 1px solid var(--red-border);
-    border-radius: 8px;
+    border: 1px solid var(--line-faint);
+    border-radius: 10px;
 }
 
 .tabela {
@@ -32,15 +32,28 @@
     border-top: 1px solid var(--line-faint);
 }
 
+.tabela tbody tr {
+    animation: entrar 0.3s var(--ease-out) backwards;
+    animation-delay: calc(min(var(--i, 0), 10) * 30ms);
+    transition: background 0.2s var(--ease-out);
+}
+
+.tabela tbody tr:hover {
+    background: var(--red-soft);
+}
+
 .colLinha {
     width: 56px;
     white-space: nowrap;
+    color: var(--red);
+    font-family: var(--font-mono);
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 
 .colCampo {
     width: 110px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .colMotivo {
@@ -49,8 +62,22 @@
 }
 
 .dica {
-    margin: 8px 0 0;
+    margin: 10px 0 0;
+    color: var(--ink-dim);
     font-size: 12px;
+}
+
+@keyframes entrar {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tabela tbody tr {
+        animation: none;
+    }
 }
 
 @media (max-width: 480px) {

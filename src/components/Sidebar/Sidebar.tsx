@@ -11,8 +11,8 @@ interface SidebarProps {
   onClose: () => void;
   motoristasCount?: number;
   frotaCount?: number;
-  activeTab: "home" | "drivers";
-  onNavigate: (pagina: "home" | "drivers") => void;
+  activeTab: "home" | "drivers" | "usuarios";
+  onNavigate: (pagina: "home" | "drivers" | "usuarios") => void;
 }
 
 export function Sidebar({
@@ -28,10 +28,15 @@ export function Sidebar({
   const { abrirImportacao } = useImportCsv();
 
   const handleNavClick = (tabKey: string) => {
-    if (tabKey === "home" || tabKey === "drivers") {
+    if (tabKey === "home" || tabKey === "drivers" || tabKey === "usuarios") {
       if (tabKey === "home" && !podeVerFinanceiro) {
         return;
       }
+
+      if (tabKey === "usuarios" && perfil !== "gestor") {
+        return;
+      }
+
 
       onNavigate(tabKey);
 
@@ -126,6 +131,19 @@ export function Sidebar({
             <FontAwesomeIcon icon={icons.rankingStar} />
             <span>Ranking</span>
           </button>
+
+          {perfil === "gestor" && (
+            <button
+              className={`${styles.navlink} ${
+                activeTab === "usuarios" ? styles.active : ""
+              }`}
+              type="button"
+              onClick={() => handleNavClick("usuarios")}
+            >
+              <FontAwesomeIcon icon={icons.users} />
+              <span>Usuários</span>
+            </button>
+          )}
 
           {/* DADOS */}
           <div className={styles.navGroupLabel}>Dados</div>
