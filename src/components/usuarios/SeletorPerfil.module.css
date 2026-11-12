@@ -1,0 +1,177 @@
+.gestor {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.operador {
+  background: var(--cyan-soft);
+  color: color-mix(in srgb, var(--cyan) 62%, var(--ink));
+}
+
+/* ---------- botão ---------- */
+.gatilho {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px 5px 10px;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.gatilho:hover:not(:disabled) {
+  border-color: color-mix(in srgb, currentColor 55%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.gatilho:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.gatilho:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.gatilhoAberto {
+  border-color: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.icone {
+  font-size: 11px;
+}
+
+.seta {
+  margin-left: 2px;
+  font-size: 10px;
+  opacity: 0.8;
+  transition: transform var(--transition-fast);
+}
+
+.gatilhoAberto .seta {
+  transform: rotate(180deg);
+}
+
+/* Desabilitado (própria linha): mantém o contraste do texto, só tira a interação */
+.gatilho:disabled {
+  cursor: not-allowed;
+  border-style: dashed;
+  border-color: color-mix(in srgb, currentColor 30%, transparent);
+}
+
+.gatilho:disabled .seta {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* ---------- menu ---------- */
+.menu {
+  position: fixed;
+  z-index: 200;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface-0);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-pop);
+  transform-origin: top left;
+  animation: menuEntra 0.16s var(--ease-out);
+}
+
+.menuAcima {
+  transform: translateY(-100%);
+  transform-origin: bottom left;
+  animation-name: menuEntraAcima;
+}
+
+.opcao {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  color: var(--ink);
+  cursor: pointer;
+  outline: none;
+  transition: background var(--transition-fast);
+}
+
+.opcao:hover,
+.opcao:focus-visible {
+  background: var(--surface-2);
+}
+
+.opcao:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--brand);
+}
+
+.opcaoAtiva {
+  background: color-mix(in srgb, var(--brand) 7%, transparent);
+}
+
+.opcaoIcone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.opcaoTexto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+
+.opcaoTexto strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.opcaoTexto small {
+  font-size: 11.5px;
+  color: var(--ink-dim);
+}
+
+.opcaoCheck {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--brand);
+}
+
+@keyframes menuEntra {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
+@keyframes menuEntraAcima {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-100% + 6px)) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu,
+  .gatilho,
+  .seta {
+    animation: none;
+    transition: none;
+  }
+}

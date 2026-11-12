@@ -167,3 +167,79 @@
 .retryBtn:active {
   transform: scale(0.96);
 }
+
+/* ---------- esqueleto da lista (substitui o spinner) ---------- */
+.esqCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 132px;
+  padding: 18px 20px;
+  background: var(--surface-0);
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  animation: esqPulsa 1.4s ease-in-out infinite;
+}
+
+.esqAvatar,
+.esqLinhas i,
+.esqPilula {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: esqBrilho 1.6s ease-in-out infinite;
+}
+
+.esqAvatar {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+}
+
+.esqLinhas {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.esqLinhas i {
+  height: 12px;
+  border-radius: 6px;
+}
+
+.esqLinhas i:first-child {
+  width: 62%;
+}
+
+.esqLinhas i:last-child {
+  width: 38%;
+}
+
+.esqPilula {
+  width: 84px;
+  height: 24px;
+  border-radius: 12px;
+}
+
+@keyframes esqBrilho {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes esqPulsa {
+  50% {
+    opacity: 0.75;
+  }
+}

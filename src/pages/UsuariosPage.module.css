@@ -708,24 +708,3 @@
     animation: none;
   }
 }
-
-/* ---------- seletor de perfil ---------- */
-.seletorPerfil {
-  padding: 4px 28px 4px 11px;
-  border: 1px solid transparent;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.seletorPerfil:disabled {
-  cursor: not-allowed;
-  opacity: 0.75;
-}
-
-.seletorPerfil:focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
-}

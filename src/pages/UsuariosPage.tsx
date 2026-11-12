@@ -11,6 +11,7 @@ import { useProfile, type Perfil } from "../context/ProfileContext";
 import { useUsuarios } from "../hooks/useUsuarios";
 import layout from "./DriversPage.module.css";
 import styles from "./UsuariosPage.module.css";
+import { SeletorPerfil } from "../components/usuarios/SeletorPerfil";
 import { ConfirmarPerfilModal } from "../components/usuarios/ConfirmarPerfilModal";
 
 type FiltroStatus = "todos" | "ativos" | "inativos";
@@ -448,22 +449,15 @@ function UsuariosConteudo() {
                       </td>
 
                       <td data-label="Perfil">
-                        <select
-                          className={`${styles.seletorPerfil} ${usuario.perfil === "gestor" ? styles.badgeGestor : styles.badgeOperador
-                            }`}
-                          value={usuario.perfil}
-                          disabled={ehVoce || salvandoPerfil}
-                          aria-label={`Perfil de ${usuario.nome}`}
-                          title={
+                        <SeletorPerfil
+                          valor={usuario.perfil}
+                          nomeUsuario={usuario.nome}
+                          desabilitado={ehVoce || salvandoPerfil}
+                          dica={
                             ehVoce ? "Você não pode alterar o próprio perfil." : "Alterar perfil"
                           }
-                          onChange={(e) =>
-                            setPendente({ usuario, novoPerfil: e.currentTarget.value as Perfil })
-                          }
-                        >
-                          <option value="gestor">Gestor</option>
-                          <option value="operador">Operador</option>
-                        </select>
+                          onChange={(novoPerfil) => setPendente({ usuario, novoPerfil })}
+                        />
                       </td>
 
                       <td data-label="Situação">

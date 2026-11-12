@@ -225,6 +225,7 @@ svg {
 .main {
   flex: 1;
   min-width: 0;
+  overflow-x: clip; /* rede de segurança: nada empurra a página para os lados */
   padding: 40px 46px 90px;
 }
 
@@ -363,4 +364,29 @@ svg {
 .theme-transitioning * {
   transition: background-color var(--transition-theme), border-color var(--transition-theme),
     color var(--transition-theme), box-shadow var(--transition-theme) !important;
+}
+/* ============ TRANSIÇÃO ENTRE PÁGINAS ============
+   Só opacidade, de propósito: um `transform` (mesmo animado) no wrapper faria dele o
+   bloco de contenção dos elementos `position: fixed` das páginas (ex.: o drawer de
+   motoristas, que fica fora da tela com translateX(100%)) e criaria scroll lateral. */
+.page-enter {
+  animation: pagina-entra 0.35s ease-out;
+}
+
+@keyframes pagina-entra {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Respeita quem prefere menos movimento: remove animações e transições globais */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
