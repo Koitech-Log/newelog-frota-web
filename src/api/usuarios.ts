@@ -48,4 +48,9 @@ export const usuariosApi = {
   atualizarAtivo(id: number, ativo: boolean) {
     return authApiClient.patch<Usuario>(`/api/usuarios/${id}/ativo`, { ativo });
   },
+
+  /** Altera o perfil (PATCH /api/usuarios/{id}/perfil). */
+  atualizarPerfil(id: number, perfil: Perfil) {
+    return authApiClient.patch<Usuario>(`/api/usuarios/${id}/perfil`, { perfil });
+  },
 };
