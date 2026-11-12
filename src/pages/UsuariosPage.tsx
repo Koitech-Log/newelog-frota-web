@@ -11,6 +11,7 @@ import { useProfile, type Perfil } from "../context/ProfileContext";
 import { useUsuarios } from "../hooks/useUsuarios";
 import layout from "./DriversPage.module.css";
 import styles from "./UsuariosPage.module.css";
+import { ConfirmarPerfilModal } from "../components/usuarios/ConfirmarPerfilModal";
 
 type FiltroStatus = "todos" | "ativos" | "inativos";
 
@@ -72,6 +73,8 @@ function UsuariosConteudo() {
   const [perfilFiltro, setPerfilFiltro] = useState<Perfil | "">("");
   const [statusFiltro, setStatusFiltro] = useState<FiltroStatus>("todos");
   const [modalAberto, setModalAberto] = useState(false);
+  const [pendente, setPendente] = useState<{ usuario: Usuario; novoPerfil: Perfil } | null>(null);
+  const [salvandoPerfil, setSalvandoPerfil] = useState(false);
   const [alternando, setAlternando] = useState<ReadonlySet<number>>(new Set());
   const [novoId, setNovoId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ mensagem: string; tipo: "success" | "error" } | null>(null);
@@ -173,6 +176,32 @@ function UsuariosConteudo() {
         proximo.delete(usuario.id);
         return proximo;
       });
+    }
+  }
+
+  async function confirmarPerfil() {
+    if (!pendente) return;
+    setSalvandoPerfil(true);
+
+    try {
+      const atualizado = await usuariosApi.atualizarPerfil(pendente.usuario.id, pendente.novoPerfil);
+      recarregarTudo(); // atualiza a lista, os cartões e os contadores
+      setToast({
+        mensagem: `Perfil de ${atualizado.nome} alterado para ${atualizado.perfil === "gestor" ? "Gestor" : "Operador"
+          }.`,
+        tipo: "success",
+      });
+    } catch (falha) {
+      setToast({
+        mensagem:
+          falha instanceof ApiRequestError
+            ? falha.message
+            : "Não foi possível alterar o perfil. Verifique sua conexão.",
+        tipo: "error",
+      });
+    } finally {
+      setSalvandoPerfil(false);
+      setPendente(null);
     }
   }
 
@@ -396,9 +425,8 @@ function UsuariosConteudo() {
                   return (
                     <tr
                       key={usuario.id}
-                      className={`${!usuario.ativo ? styles.linhaInativa : ""} ${
-                        usuario.id === novoId ? styles.linhaNova : ""
-                      }`}
+                      className={`${!usuario.ativo ? styles.linhaInativa : ""} ${usuario.id === novoId ? styles.linhaNova : ""
+                        }`}
                       style={{ "--i": Math.min(indice, 12) } as CSSProperties}
                     >
                       <td data-label="Usuário">
@@ -420,14 +448,22 @@ function UsuariosConteudo() {
                       </td>
 
                       <td data-label="Perfil">
-                        <span
-                          className={`${styles.badge} ${usuario.perfil === "gestor" ? styles.badgeGestor : styles.badgeOperador}`}
+                        <select
+                          className={`${styles.seletorPerfil} ${usuario.perfil === "gestor" ? styles.badgeGestor : styles.badgeOperador
+                            }`}
+                          value={usuario.perfil}
+                          disabled={ehVoce || salvandoPerfil}
+                          aria-label={`Perfil de ${usuario.nome}`}
+                          title={
+                            ehVoce ? "Você não pode alterar o próprio perfil." : "Alterar perfil"
+                          }
+                          onChange={(e) =>
+                            setPendente({ usuario, novoPerfil: e.currentTarget.value as Perfil })
+                          }
                         >
-                          <FontAwesomeIcon
-                            icon={usuario.perfil === "gestor" ? icons.userTie : icons.userGear}
-                          />
-                          {usuario.perfil === "gestor" ? "Gestor" : "Operador"}
-                        </span>
+                          <option value="gestor">Gestor</option>
+                          <option value="operador">Operador</option>
+                        </select>
                       </td>
 
                       <td data-label="Situação">
@@ -492,6 +528,14 @@ function UsuariosConteudo() {
       )}
 
       <NovoUsuarioModal aberto={modalAberto} onClose={fecharModal} onCriado={handleCriado} />
+      <ConfirmarPerfilModal
+        aberto={pendente !== null}
+        nome={pendente?.usuario.nome ?? ""}
+        novoPerfil={pendente?.novoPerfil ?? "operador"}
+        salvando={salvandoPerfil}
+        onConfirmar={() => void confirmarPerfil()}
+        onCancelar={() => setPendente(null)}
+      />
       <Toast mensagem={toast?.mensagem ?? null} tipo={toast?.tipo} onFechar={fecharToast} />
     </section>
   );
