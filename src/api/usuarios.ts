@@ -20,12 +20,27 @@ export interface NovoUsuario {
   perfil: Perfil;
 }
 
+/** Contrato de GET /api/usuarios/{id}/historico-perfil, do auth-service. */
+export interface HistoricoPerfil {
+  id: number;
+  usuarioId: number;
+  alteradoPorId: number;
+  alteradoPorNome: string;
+  alteradoEm: string;
+  perfilAnterior: Perfil;
+  perfilNovo: Perfil;
+}
+
 interface FiltrosUsuario {
   busca: string;
   perfil: Perfil | "";
 }
 
 export const usuariosApi = {
+  historicoPerfil(id: number, signal?: AbortSignal) {
+    return authApiClient.get<HistoricoPerfil[]>(`/api/usuarios/${id}/historico-perfil`, signal);
+  },
+
   listar({ busca, perfil }: FiltrosUsuario, signal?: AbortSignal) {
     const params = new URLSearchParams();
     const termo = busca.trim();

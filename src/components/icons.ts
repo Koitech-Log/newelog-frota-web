@@ -89,6 +89,8 @@ import {
   faMinus,
   faBolt,
   faClock,
+  faClockRotateLeft,
+  faArrowRight,
   faCalendarDay,
   faDownload,
 
@@ -180,6 +182,8 @@ export const icons = {
   flat: faMinus,
   bolt: faBolt,
   clock: faClock,
+  history: faClockRotateLeft,
+  arrowRight: faArrowRight,
   calendarDay: faCalendarDay,
   download: faDownload,
 
