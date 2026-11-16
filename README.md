@@ -83,6 +83,23 @@ src/
 
 O login chama `POST /api/auth/login` e guarda token, nome e perfil no `sessionStorage`, ou no `localStorage` quando "Manter conectado" está marcado. O `ProfileContext` lê o perfil da sessão. Com perfil **Operador**, a Visão geral não aparece e a seção "Resultado financeiro" do drawer some inteira, em vez de aparecer mascarada. Ao sair ou trocar de usuário, o estado da área logada é refeito do zero.
 
+### Histórico de perfil (US16 — KOI-182)
+
+Na página **Usuários**, exclusiva para gestores, o botão **Histórico** de cada
+linha consulta `GET /api/usuarios/{id}/historico-perfil` no `auth-service` e abre
+um modal somente leitura. Mostra autor, data/hora no fuso do navegador e perfis
+anterior e novo, na ordem devolvida pelo backend (mais recentes primeiro).
+
+O modal contempla carregamento, histórico vazio, falha de consulta e nova
+tentativa. Cada abertura consulta a API novamente; fechar ou trocar o usuário
+cancela a requisição anterior. Não há dados simulados nem opções de edição ou
+exclusão. Escape, clique no fundo ou os botões de fechar encerram o modal e
+devolvem o foco ao botão da lista.
+
+Requer a implementação da US16 no `newelog-auth-service`, incluindo a migration
+de histórico. Configure `VITE_AUTH_SERVICE_URL` para o backend que contém essa
+versão; a URL padrão é `http://localhost:8082`.
+
 ### Tema claro/escuro
 
 O `ThemeContext` aplica o tema pelo atributo `data-theme` na raiz; os tokens de cor ficam em `src/index.css`. Na primeira visita segue o sistema operacional (`prefers-color-scheme`). Depois a escolha fica salva no `localStorage` (chave `newelog:tema`).
@@ -103,6 +120,7 @@ Os tipos em `src/types/` espelham os DTOs Java. Se o contrato de algum back-end 
 | Serviço | Método | Rota | Uso neste front-end |
 | :--- | :--- | :--- | :--- |
 | `auth-service` | POST | `/api/auth/login` | Tela de login |
+| `auth-service` | GET | `/api/usuarios/{id}/historico-perfil` | Modal de histórico de perfil do usuário |
 | `motoristas-service` | GET | `/api/motoristas?status=&busca=&destino=&page=&size=` | Grade de cards da tela de Motoristas (o filtro de tipo de veículo é aplicado no front-end) |
 | `motoristas-service` | GET | `/api/motoristas/{id}` | Drawer de detalhe |
 | `motoristas-service` | PATCH | `/api/motoristas/{id}/status` | Botões "Disponível" / "Em operação" |

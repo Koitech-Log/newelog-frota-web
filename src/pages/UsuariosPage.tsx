@@ -13,6 +13,7 @@ import layout from "./DriversPage.module.css";
 import styles from "./UsuariosPage.module.css";
 import { SeletorPerfil } from "../components/usuarios/SeletorPerfil";
 import { ConfirmarPerfilModal } from "../components/usuarios/ConfirmarPerfilModal";
+import { HistoricoPerfilModal } from "../components/usuarios/HistoricoPerfilModal";
 
 type FiltroStatus = "todos" | "ativos" | "inativos";
 
@@ -74,6 +75,7 @@ function UsuariosConteudo() {
   const [perfilFiltro, setPerfilFiltro] = useState<Perfil | "">("");
   const [statusFiltro, setStatusFiltro] = useState<FiltroStatus>("todos");
   const [modalAberto, setModalAberto] = useState(false);
+  const [usuarioHistorico, setUsuarioHistorico] = useState<Usuario | null>(null);
   const [pendente, setPendente] = useState<{ usuario: Usuario; novoPerfil: Perfil } | null>(null);
   const [salvandoPerfil, setSalvandoPerfil] = useState(false);
   const [alternando, setAlternando] = useState<ReadonlySet<number>>(new Set());
@@ -407,6 +409,7 @@ function UsuariosConteudo() {
                   <th scope="col">Perfil</th>
                   <th scope="col">Situação</th>
                   <th scope="col">Último acesso</th>
+                  <th scope="col">Histórico</th>
                   <th scope="col" className={styles.colAcesso}>
                     Acesso
                   </th>
@@ -490,6 +493,18 @@ function UsuariosConteudo() {
                         {formatarUltimoAcesso(usuario.ultimoLoginEm)}
                       </td>
 
+                      <td data-label="Histórico">
+                        <button
+                          type="button"
+                          className={styles.historicoBtn}
+                          aria-label={`Ver histórico de ${usuario.nome}`}
+                          onClick={() => setUsuarioHistorico(usuario)}
+                        >
+                          <FontAwesomeIcon icon={icons.history} />
+                          Histórico
+                        </button>
+                      </td>
+
                       <td data-label="Acesso" className={styles.colAcesso}>
                         <button
                           type="button"
@@ -522,6 +537,13 @@ function UsuariosConteudo() {
       )}
 
       <NovoUsuarioModal aberto={modalAberto} onClose={fecharModal} onCriado={handleCriado} />
+      {usuarioHistorico && (
+        <HistoricoPerfilModal
+          key={usuarioHistorico.id}
+          usuario={usuarioHistorico}
+          onFechar={() => setUsuarioHistorico(null)}
+        />
+      )}
       <ConfirmarPerfilModal
         aberto={pendente !== null}
         nome={pendente?.usuario.nome ?? ""}

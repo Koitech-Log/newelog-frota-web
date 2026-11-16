@@ -292,6 +292,29 @@
   background: var(--surface-1);
 }
 
+.historicoBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-sm);
+  background: var(--brand-soft);
+  color: var(--brand);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.historicoBtn:hover {
+  background: var(--btn);
+  color: #fff;
+}
+
 .colAcesso {
   width: 1%;
   white-space: nowrap;
