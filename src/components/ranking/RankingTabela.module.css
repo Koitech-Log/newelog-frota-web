@@ -141,8 +141,12 @@
     padding: 3px 5px;
   }
 
+  /* em telas estreitas o nome quebra em linhas em vez de ser cortado */
   .nome {
-    max-width: 104px;
+    max-width: none;
+    overflow: visible;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
 
