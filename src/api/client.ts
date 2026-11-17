@@ -5,6 +5,9 @@ import { AUTH_SERVICE_URL } from "./auth";
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
+const RANKING_SERVICE_URL =
+  import.meta.env.VITE_RANKING_SERVICE_URL ?? "http://localhost:8083";
+
 export class ApiRequestError extends Error {
   status: number;
 
@@ -85,4 +88,9 @@ export const authApiClient = {
 
   patch: <T>(path: string, body: unknown) =>
     request<T>(path, { method: "PATCH", body: JSON.stringify(body) }, AUTH_SERVICE_URL),
+};
+
+export const rankingApiClient = {
+  get: <T>(path: string, signal?: AbortSignal) =>
+    request<T>(path, { method: "GET", signal }, RANKING_SERVICE_URL),
 };
