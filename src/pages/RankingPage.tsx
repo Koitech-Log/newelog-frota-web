@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { TipoRanking } from "../api/ranking";
 import { icons } from "../components/icons";
@@ -10,22 +10,29 @@ import { useRanking } from "../hooks/useRanking";
 import { inteiro } from "../utils/formatadores";
 import styles from "./RankingPage.module.css";
 
+/** Espera o gestor parar de digitar antes de consultar o serviço. */
+const ATRASO_BUSCA_MS = 350;
+const BUSCA_MAXIMA = 150;
 /** Primeiro mês disponível no seletor: janeiro de 2020. */
 const INDICE_MINIMO = 2020 * 12;
 
 const VISOES: Record<
   TipoRanking,
-  { rotulo: string; singular: string; plural: string }
+  { rotulo: string; singular: string; plural: string; busca: string; vazioBusca: string }
 > = {
   motoristas: {
     rotulo: "Motoristas",
     singular: "motorista",
     plural: "motoristas",
+    busca: "Buscar por nome ou CPF",
+    vazioBusca: "Nenhum motorista encontrado",
   },
   veiculos: {
     rotulo: "Veículos",
     singular: "veículo",
     plural: "veículos",
+    busca: "Buscar por placa, nome ou CPF do motorista",
+    vazioBusca: "Nenhum veículo encontrado",
   },
 };
 
@@ -75,11 +82,27 @@ function RankingConteudo() {
     mes: hoje.getMonth() + 1,
   }));
   const [tipo, setTipo] = useState<TipoRanking>("motoristas");
+  const [busca, setBusca] = useState("");
+  const [buscaAplicada, setBuscaAplicada] = useState("");
+
+  // A busca vai ao serviço depois de uma pausa na digitação; limpar é imediato.
+  useEffect(() => {
+    const termo = busca.trim();
+    if (!termo || termo === buscaAplicada) return;
+    const id = window.setTimeout(() => setBuscaAplicada(termo), ATRASO_BUSCA_MS);
+    return () => window.clearTimeout(id);
+  }, [busca, buscaAplicada]);
+
+  function alterarBusca(valor: string) {
+    setBusca(valor);
+    if (!valor.trim()) setBuscaAplicada("");
+  }
+
   const { resposta, erro, carregando, recarregar } = useRanking({
     ano: periodo.ano,
     mes: periodo.mes,
     tipo,
-    busca: "",
+    busca: buscaAplicada,
   });
 
   const indiceAtual = indiceDoMes(hoje);
@@ -92,11 +115,19 @@ function RankingConteudo() {
     setPeriodo({ ano: Math.floor(indice / 12), mes: (indice % 12) + 1 });
   }
 
+  function limparBusca() {
+    alterarBusca("");
+  }
+
   const visao = VISOES[tipo];
   const mesNome = nomeDoMes(periodo.ano, periodo.mes);
   const itens = resposta?.dados ?? [];
+  // Com busca e lista vazia: se o serviço informa que o mês não teve participantes,
+  // o vazio é do mês, não da busca. Sem `totalParticipantes`, vale a busca enviada.
+  const vazioDaBusca = !!buscaAplicada && resposta?.totalParticipantes !== 0;
   const criterio = resposta ? CRITERIOS[resposta.criterioOrdenacao] : undefined;
-  const ocupado = carregando;
+  // digitou e a consulta ainda não saiu: já conta como "atualizando" para o indicador
+  const ocupado = carregando || busca.trim() !== buscaAplicada;
 
   return (
     <section className={styles.page} aria-busy={ocupado}>
@@ -156,6 +187,32 @@ function RankingConteudo() {
       </div>
 
       <div className={styles.card}>
+        <div className={styles.busca}>
+          <FontAwesomeIcon icon={icons.search} aria-hidden="true" />
+          <input
+            type="text"
+            inputMode="search"
+            value={busca}
+            maxLength={BUSCA_MAXIMA}
+            onChange={(event) => alterarBusca(event.target.value)}
+            placeholder={`${visao.busca}…`}
+            aria-label={visao.busca}
+            autoComplete="off"
+            spellCheck={false}
+          />
+          {busca && (
+            <button
+              type="button"
+              className={styles.limpar}
+              onClick={limparBusca}
+              aria-label="Limpar busca"
+              title="Limpar busca"
+            >
+              <FontAwesomeIcon icon={icons.close} />
+            </button>
+          )}
+        </div>
+
         <div
           className={`${styles.progresso} ${ocupado ? styles.progressoAtivo : ""}`}
           aria-hidden="true"
@@ -190,11 +247,22 @@ function RankingConteudo() {
         {!carregando && resposta && itens.length === 0 && (
           <div className={styles.estado} role="status">
             <span className={styles.estadoIcone} aria-hidden="true">
-              <FontAwesomeIcon icon={icons.inbox} />
+              <FontAwesomeIcon icon={vazioDaBusca ? icons.search : icons.inbox} />
             </span>
-            <p>
-              Nenhuma viagem registrada em {mesNome}/{periodo.ano}.
-            </p>
+            {vazioDaBusca ? (
+              <>
+                <p>
+                  {visao.vazioBusca} para “{buscaAplicada}”.
+                </p>
+                <button type="button" className={styles.acao} onClick={limparBusca}>
+                  <FontAwesomeIcon icon={icons.close} /> Limpar busca
+                </button>
+              </>
+            ) : (
+              <p>
+                Nenhuma viagem registrada em {mesNome}/{periodo.ano}.
+              </p>
+            )}
           </div>
         )}
 
@@ -208,6 +276,9 @@ function RankingConteudo() {
               )}
               <span className={styles.contagem}>
                 {inteiro.format(itens.length)} {itens.length === 1 ? visao.singular : visao.plural}
+                {buscaAplicada &&
+                  resposta.totalParticipantes != null &&
+                  ` de ${inteiro.format(resposta.totalParticipantes)}`}
               </span>
             </p>
             <RankingTabela
