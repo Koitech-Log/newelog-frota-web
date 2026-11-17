@@ -8,6 +8,8 @@ interface SeletorPeriodoProps {
   mes: number;
   /** Índice (ano * 12 + mês − 1) do último mês que pode ser escolhido — o mês atual. */
   indiceMaximo: number;
+  /** Índice do primeiro mês que pode ser escolhido. Sem valor, não há limite inferior. */
+  indiceMinimo?: number;
   onChange: (ano: number, mes: number) => void;
 }
 
@@ -35,7 +37,13 @@ function nomeDoMes(ano: number, mes: number, completo = false) {
 }
 
 /** Calendário em popover (grade de meses + navegação por ano), no lugar do seletor nativo. */
-export function SeletorPeriodo({ ano, mes, indiceMaximo, onChange }: SeletorPeriodoProps) {
+export function SeletorPeriodo({
+  ano,
+  mes,
+  indiceMaximo,
+  indiceMinimo = ANO_MINIMO * 12,
+  onChange,
+}: SeletorPeriodoProps) {
   const [aberto, setAberto] = useState(false);
   const [anoVisivel, setAnoVisivel] = useState(ano);
   const [direcao, setDirecao] = useState<1 | -1>(1);
@@ -46,6 +54,7 @@ export function SeletorPeriodo({ ano, mes, indiceMaximo, onChange }: SeletorPeri
   const anoAtual = Math.floor(indiceMaximo / 12);
   const mesAtual = (indiceMaximo % 12) + 1;
   const mesAnterior = indiceMaximo - 1;
+  const anoMinimo = Math.max(ANO_MINIMO, Math.floor(indiceMinimo / 12));
 
   // Ao abrir, foca o mês selecionado (ou o primeiro disponível) para navegar pelo teclado.
   useEffect(() => {
@@ -75,7 +84,7 @@ export function SeletorPeriodo({ ano, mes, indiceMaximo, onChange }: SeletorPeri
 
   function trocarAno(delta: number) {
     const novo = anoVisivel + delta;
-    if (novo < ANO_MINIMO || novo > Math.min(ANO_MAXIMO, anoAtual)) return;
+    if (novo < anoMinimo || novo > Math.min(ANO_MAXIMO, anoAtual)) return;
 
     setDirecao(delta > 0 ? 1 : -1);
     setAnoVisivel(novo);
@@ -174,7 +183,7 @@ export function SeletorPeriodo({ ano, mes, indiceMaximo, onChange }: SeletorPeri
                 type="button"
                 className={styles.anoBtn}
                 onClick={() => trocarAno(-1)}
-                disabled={anoVisivel <= ANO_MINIMO}
+                disabled={anoVisivel <= anoMinimo}
                 aria-label="Ano anterior"
               >
                 <FontAwesomeIcon icon={icons.chevronLeft} />
@@ -219,7 +228,7 @@ export function SeletorPeriodo({ ano, mes, indiceMaximo, onChange }: SeletorPeri
                       ehAtual ? styles.mesAtual : ""
                     }`}
                     style={{ animationDelay: `${i * 22}ms` }}
-                    disabled={indice > indiceMaximo}
+                    disabled={indice > indiceMaximo || indice < indiceMinimo}
                     aria-pressed={selecionado}
                     aria-label={nomeDoMes(anoVisivel, i + 1, true)}
                     onClick={() => escolher(anoVisivel, i + 1)}
@@ -243,7 +252,7 @@ export function SeletorPeriodo({ ano, mes, indiceMaximo, onChange }: SeletorPeri
                 type="button"
                 className={styles.atalho}
                 onClick={() => escolherIndice(mesAnterior)}
-                disabled={indiceSelecionado === mesAnterior || mesAnterior < 0}
+                disabled={indiceSelecionado === mesAnterior || mesAnterior < indiceMinimo}
               >
                 Mês passado
               </button>

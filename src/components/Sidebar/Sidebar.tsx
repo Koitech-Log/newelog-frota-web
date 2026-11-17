@@ -11,8 +11,8 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   motoristasCount?: number;
-  activeTab: "home" | "drivers" | "usuarios";
-  onNavigate: (pagina: "home" | "drivers" | "usuarios") => void;
+  activeTab: "home" | "drivers" | "ranking" | "usuarios";
+  onNavigate: (pagina: "home" | "drivers" | "ranking" | "usuarios") => void;
 }
 
 export function Sidebar({
@@ -37,12 +37,17 @@ export function Sidebar({
   }, [isOpen, onClose]);
 
   const handleNavClick = (tabKey: string) => {
-    if (tabKey === "home" || tabKey === "drivers" || tabKey === "usuarios") {
+    if (
+      tabKey === "home" ||
+      tabKey === "drivers" ||
+      tabKey === "ranking" ||
+      tabKey === "usuarios"
+    ) {
       if (tabKey === "home" && !podeVerFinanceiro) {
         return;
       }
 
-      if (tabKey === "usuarios" && perfil !== "gestor") {
+      if ((tabKey === "usuarios" || tabKey === "ranking") && perfil !== "gestor") {
         return;
       }
 
@@ -121,17 +126,18 @@ export function Sidebar({
             <span className={styles.count}>{motoristasCount}</span>
           </button>
 
-          <button
-            className={`${styles.navlink} ${styles.emBreve}`}
-            type="button"
-            aria-disabled="true"
-            title="Em breve"
-            onClick={() => handleNavClick("rank")}
-          >
-            <FontAwesomeIcon icon={icons.rankingStar} />
-            <span>Ranking</span>
-            <span className={styles.soon}>Em breve</span>
-          </button>
+          {perfil === "gestor" && (
+            <button
+              className={`${styles.navlink} ${
+                activeTab === "ranking" ? styles.active : ""
+              }`}
+              type="button"
+              onClick={() => handleNavClick("ranking")}
+            >
+              <FontAwesomeIcon icon={icons.rankingStar} />
+              <span>Ranking</span>
+            </button>
+          )}
 
           {perfil === "gestor" && (
             <button

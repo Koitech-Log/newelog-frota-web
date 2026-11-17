@@ -1,0 +1,53 @@
+.lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.linha {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--line-faint);
+}
+
+.linha:last-child {
+  border-bottom: 0;
+}
+
+.bloco {
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: brilho 1.3s linear infinite;
+}
+
+.posicao {
+  flex: 0 0 38px;
+  height: 22px;
+}
+
+.nome {
+  flex: 0 1 240px;
+}
+
+.valor {
+  flex: 0 0 90px;
+  margin-left: auto;
+}
+
+@keyframes brilho {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bloco {
+    animation: none;
+  }
+}

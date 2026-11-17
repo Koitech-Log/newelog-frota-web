@@ -12,12 +12,13 @@ import { ImportManifestoProvider } from "./context/ImportManifestoContext";
 import { FrotaProvider, useFrota } from "./context/FrotaContext";
 import { ImportCsvProvider, useImportCsv } from "./context/ImportCsvContext";
 import { UsuariosPage } from "./pages/UsuariosPage";
+import { RankingPage } from "./pages/RankingPage";
 import { TrocaSenhaPage } from "./pages/TrocaSenhaPage";
 import { BackToTop } from "./components/BackToTop";
 import { StatusConexao } from "./components/StatusConexao";
 import { useAtalhoBusca } from "./hooks/useAtalhoBusca";
 
-type Pagina = "home" | "drivers" | "usuarios";
+type Pagina = "home" | "drivers" | "ranking" | "usuarios";
 
 /** A página aberta sobrevive ao refresh (por aba); uma aba nova começa na visão geral. */
 const CHAVE_PAGINA = "newelog:pagina-ativa";
@@ -25,6 +26,7 @@ const CHAVE_PAGINA = "newelog:pagina-ativa";
 const TITULOS: Record<Pagina, string> = {
   home: "Visão geral",
   drivers: "Motoristas",
+  ranking: "Ranking",
   usuarios: "Usuários",
 };
 
@@ -33,6 +35,7 @@ function lerPaginaInicial(perfilGestor: boolean): Pagina {
     const salva = sessionStorage.getItem(CHAVE_PAGINA);
     if (salva === "drivers") return "drivers";
     if (salva === "usuarios" && perfilGestor) return "usuarios";
+    if (salva === "ranking" && perfilGestor) return "ranking";
   } catch {
     /* storage indisponível: cai na visão geral */
   }
@@ -105,7 +108,7 @@ function MobileTopbar({
 function Layout() {
   const { perfil, podeVerFinanceiro } = useProfile();
 
-  // Só o gestor vê a visão geral (financeiro) e a página de usuários.
+  // Só o gestor vê a visão geral (financeiro), o ranking e a página de usuários.
   const [paginaAtiva, setPaginaAtiva] = useState<Pagina>(() =>
     lerPaginaInicial(podeVerFinanceiro && perfil === "gestor"),
   );
@@ -124,7 +127,9 @@ function Layout() {
   const paginaEfetiva: Pagina =
     paginaAtiva === "usuarios" && perfil === "gestor"
       ? "usuarios"
-      : paginaAtiva === "home" && podeVerFinanceiro
+      : paginaAtiva === "ranking" && perfil === "gestor"
+        ? "ranking"
+        : paginaAtiva === "home" && podeVerFinanceiro
         ? "home"
         : "drivers";
   useEffect(() => {
@@ -166,6 +171,8 @@ function Layout() {
           <div key={paginaEfetiva} className="page-enter">
             {paginaEfetiva === "usuarios" ? (
               <UsuariosPage />
+            ) : paginaEfetiva === "ranking" ? (
+              <RankingPage />
             ) : paginaEfetiva === "home" ? (
               <DashboardPage />
             ) : (
