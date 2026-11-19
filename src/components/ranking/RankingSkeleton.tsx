@@ -14,3 +14,18 @@ export function RankingSkeleton({ linhas = 6 }: { linhas?: number }) {
     </div>
   );
 }
+
+/** Placeholders dos quatro indicadores enquanto o ranking do filtro atual não chegou. */
+export function RankingKpiSkeleton() {
+  return (
+    <div className={styles.kpis} aria-hidden="true">
+      {Array.from({ length: 4 }, (_, i) => (
+        <div key={i} className={styles.kpi}>
+          <span className={`${styles.bloco} ${styles.kpiTitulo}`} />
+          <span className={`${styles.bloco} ${styles.kpiValor}`} />
+          <span className={`${styles.bloco} ${styles.kpiTexto}`} />
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -93,6 +93,12 @@ import {
   faArrowRight,
   faCalendarDay,
   faDownload,
+  faMedal,
+  faCrown,
+  faSort,
+  faSortUp,
+  faSortDown,
+  faFilterCircleXmark,
 
   // ==================== TEMA ====================
   faSun,
@@ -186,6 +192,12 @@ export const icons = {
   arrowRight: faArrowRight,
   calendarDay: faCalendarDay,
   download: faDownload,
+  medal: faMedal,
+  crown: faCrown,
+  sort: faSort,
+  sortUp: faSortUp,
+  sortDown: faSortDown,
+  filterClear: faFilterCircleXmark,
 
   // Tema
   sun: faSun,

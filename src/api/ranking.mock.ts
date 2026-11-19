@@ -1,7 +1,7 @@
 /**
  * Dados simulados do ranking, usados só em desenvolvimento (VITE_RANKING_MOCK=1)
  * enquanto o ranking-service não está disponível. Segue o `contrato-api`:
- * ordem por resultado ↓, viagens ↓, nome/placa, ID; posição definida ANTES da busca.
+ * ordem por pontuação ↓ (aqui igual ao resultado, sem valorização por destino), viagens ↓, nome/placa, ID; posição definida ANTES da busca.
  *
  * Atalhos para exercitar os estados da tela:
  *  - janeiro de qualquer ano: mês sem viagens;
@@ -138,6 +138,7 @@ export async function buscarRankingMock(
     resultado: resultado(g),
     distanciaKm: null,
     destinos: ["São Paulo"],
+    pontuacao: resultado(g),
     grupo: g,
   }));
 
@@ -157,7 +158,7 @@ export async function buscarRankingMock(
     ano: consulta.ano,
     mes: consulta.mes,
     tipo: consulta.tipo,
-    criterioOrdenacao: "RESULTADO_FINANCEIRO",
+    criterioOrdenacao: "PONTUACAO",
     totalParticipantes: itens.length,
     dados: filtrados.map(({ grupo: _grupo, ...item }) => item),
   };

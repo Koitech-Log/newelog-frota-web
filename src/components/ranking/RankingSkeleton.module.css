@@ -37,12 +37,50 @@
   margin-left: auto;
 }
 
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 22px;
+  background: var(--surface-0);
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.kpiTitulo {
+  width: 45%;
+}
+
+.kpiValor {
+  width: 70%;
+  height: 26px;
+}
+
+.kpiTexto {
+  width: 85%;
+  height: 10px;
+}
+
 @keyframes brilho {
   from {
     background-position: 100% 0;
   }
   to {
     background-position: -100% 0;
+  }
+}
+
+@media (max-width: 1000px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
