@@ -18,6 +18,11 @@ export interface RankingItem {
   resultado: number;
   distanciaKm: number | null;
   destinos: string[];
+  /**
+   * Pontuação mensal usada para ordenar o ranking: soma da rentabilidade das
+   * viagens que contam no mês, já com a valorização por destino aplicada.
+   */
+  pontuacao: number;
 }
 
 export interface RankingResponse {

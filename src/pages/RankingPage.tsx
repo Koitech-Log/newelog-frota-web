@@ -3,10 +3,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { TipoRanking } from "../api/ranking";
 import { icons } from "../components/icons";
 import { SeletorPeriodo } from "../components/dashboard/SeletorPeriodo";
-import { RankingSkeleton } from "../components/ranking/RankingSkeleton";
+import { RankingKpis } from "../components/ranking/RankingKpis";
+import { RankingPodio } from "../components/ranking/RankingPodio";
+import { RankingKpiSkeleton, RankingSkeleton } from "../components/ranking/RankingSkeleton";
 import { RankingTabela } from "../components/ranking/RankingTabela";
 import { useProfile } from "../context/ProfileContext";
 import { useRanking } from "../hooks/useRanking";
+import { baixarCsv, numeroCsv, textoSeguro } from "../utils/exportarCsv";
 import { inteiro } from "../utils/formatadores";
 import styles from "./RankingPage.module.css";
 
@@ -37,8 +40,11 @@ const VISOES: Record<
 };
 
 const CRITERIOS: Record<string, string> = {
+  PONTUACAO: "Ordenado por pontuação mensal",
   RESULTADO_FINANCEIRO: "Ordenado por resultado financeiro",
 };
+
+const HORA = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
 function indiceDoMes(data: Date) {
   return data.getFullYear() * 12 + data.getMonth();
@@ -98,7 +104,7 @@ function RankingConteudo() {
     if (!valor.trim()) setBuscaAplicada("");
   }
 
-  const { resposta, erro, carregando, recarregar } = useRanking({
+  const { resposta, erro, carregando, atualizadoEm, recarregar } = useRanking({
     ano: periodo.ano,
     mes: periodo.mes,
     tipo,
@@ -119,6 +125,19 @@ function RankingConteudo() {
     alterarBusca("");
   }
 
+  const filtrosAtivos =
+    busca.trim() !== "" ||
+    tipo !== "motoristas" ||
+    periodo.ano !== hoje.getFullYear() ||
+    periodo.mes !== hoje.getMonth() + 1;
+
+  function limparFiltros() {
+    setBusca("");
+    setBuscaAplicada("");
+    setTipo("motoristas");
+    setPeriodo({ ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 });
+  }
+
   const visao = VISOES[tipo];
   const mesNome = nomeDoMes(periodo.ano, periodo.mes);
   const itens = resposta?.dados ?? [];
@@ -128,15 +147,87 @@ function RankingConteudo() {
   const criterio = resposta ? CRITERIOS[resposta.criterioOrdenacao] : undefined;
   // digitou e a consulta ainda não saiu: já conta como "atualizando" para o indicador
   const ocupado = carregando || busca.trim() !== buscaAplicada;
+  // indicadores e pódio descrevem o mês inteiro: com busca ativa só a lista filtrada aparece
+  const mostrarResumo = !!resposta && itens.length > 0 && !buscaAplicada;
+
+  function exportarCsv() {
+    if (!resposta || itens.length === 0) return;
+    const porMotorista = resposta.tipo === "motoristas";
+    const cabecalho = [
+      "Posição",
+      ...(porMotorista ? ["Motorista"] : []),
+      "Veículo",
+      "Destinos",
+      "Viagens",
+      "Frete total",
+      "Pedágios",
+      "Rentabilidade",
+      "Pontuação",
+    ];
+    const linhas = itens.map((item) => [
+      item.posicao,
+      ...(porMotorista ? [textoSeguro(item.motorista ?? "")] : []),
+      textoSeguro(item.veiculo ?? ""),
+      textoSeguro(item.destinos.join(", ")),
+      item.quantidadeViagens,
+      numeroCsv(item.freteTotal),
+      numeroCsv(item.custoTotal),
+      numeroCsv(item.resultado),
+      numeroCsv(item.pontuacao),
+    ]);
+    baixarCsv(
+      `ranking-${resposta.tipo}-${resposta.ano}-${String(resposta.mes).padStart(2, "0")}.csv`,
+      [cabecalho, ...linhas],
+    );
+  }
 
   return (
     <section className={styles.page} aria-busy={ocupado}>
-      <span className={styles.eyebrow}>Desempenho da frota</span>
-      <h1 className={styles.title}>Ranking</h1>
-      <p className={styles.subtitle}>
-        Compare {visao.plural} pela rentabilidade e pelo número de viagens em {mesNome} de{" "}
-        {periodo.ano}.
-      </p>
+      <header className={styles.cabecalho}>
+        <div className={styles.cabecalhoTexto}>
+          <span className={styles.eyebrow}>Desempenho da frota</span>
+          <h1 className={styles.title}>
+            <span className={styles.tituloIcone} aria-hidden="true">
+              <FontAwesomeIcon icon={icons.rankingStar} />
+            </span>
+            Ranking
+          </h1>
+          <p className={styles.subtitle}>
+            Compare {visao.plural} pela pontuação mensal em {mesNome} de {periodo.ano}.
+          </p>
+        </div>
+
+        <div className={styles.acoes}>
+          <div className={styles.acoesBotoes}>
+            <button
+              type="button"
+              className={styles.botaoSecundario}
+              onClick={recarregar}
+              disabled={carregando}
+              title="Buscar os dados novamente"
+            >
+              <FontAwesomeIcon icon={icons.retry} spin={carregando} aria-hidden="true" />
+              Atualizar
+            </button>
+            <button
+              type="button"
+              className={styles.botaoSecundario}
+              onClick={exportarCsv}
+              disabled={carregando || itens.length === 0}
+              title="Baixar a lista exibida em CSV"
+            >
+              <FontAwesomeIcon icon={icons.download} aria-hidden="true" />
+              Exportar CSV
+            </button>
+          </div>
+          {atualizadoEm && !erro && (
+            <p className={styles.atualizado}>
+              <span className={styles.atualizadoPonto} aria-hidden="true" />
+              Atualizado às {HORA.format(atualizadoEm)}
+            </p>
+          )}
+        </div>
+      </header>
 
       <div className={styles.toolbar} role="toolbar" aria-label="Filtros do ranking">
         <div className={styles.periodo}>
@@ -180,13 +271,12 @@ function RankingConteudo() {
               aria-pressed={tipo === chave}
               onClick={() => setTipo(chave)}
             >
+              <FontAwesomeIcon icon={chave === "motoristas" ? icons.users : icons.truck} aria-hidden="true" />
               {VISOES[chave].rotulo}
             </button>
           ))}
         </div>
-      </div>
 
-      <div className={styles.card}>
         <div className={styles.busca}>
           <FontAwesomeIcon icon={icons.search} aria-hidden="true" />
           <input
@@ -213,21 +303,36 @@ function RankingConteudo() {
           )}
         </div>
 
-        <div
-          className={`${styles.progresso} ${ocupado ? styles.progressoAtivo : ""}`}
-          aria-hidden="true"
-        />
+        <button
+          type="button"
+          className={styles.limparFiltros}
+          onClick={limparFiltros}
+          disabled={!filtrosAtivos}
+        >
+          <FontAwesomeIcon icon={icons.filterClear} aria-hidden="true" />
+          Limpar filtros
+        </button>
+      </div>
 
-        {carregando && (
-          <>
-            <p className={styles.somenteLeitor} role="status">
-              Carregando ranking...
-            </p>
+      <div
+        className={`${styles.progresso} ${ocupado ? styles.progressoAtivo : ""}`}
+        aria-hidden="true"
+      />
+
+      {carregando && (
+        <>
+          <p className={styles.somenteLeitor} role="status">
+            Carregando ranking...
+          </p>
+          <RankingKpiSkeleton />
+          <div className={styles.card}>
             <RankingSkeleton />
-          </>
-        )}
+          </div>
+        </>
+      )}
 
-        {!carregando && erro && (
+      {!carregando && erro && (
+        <div className={styles.card}>
           <div
             className={`${styles.estado} ${erro.tipo === "falha" ? styles.estadoErro : ""}`}
             role="alert"
@@ -242,9 +347,11 @@ function RankingConteudo() {
               </button>
             )}
           </div>
-        )}
+        </div>
+      )}
 
-        {!carregando && resposta && itens.length === 0 && (
+      {!carregando && resposta && itens.length === 0 && (
+        <div className={styles.card}>
           <div className={styles.estado} role="status">
             <span className={styles.estadoIcone} aria-hidden="true">
               <FontAwesomeIcon icon={vazioDaBusca ? icons.search : icons.inbox} />
@@ -264,31 +371,64 @@ function RankingConteudo() {
               </p>
             )}
           </div>
-        )}
+        </div>
+      )}
 
-        {!carregando && resposta && itens.length > 0 && (
-          <>
-            <p className={styles.resumo} aria-live="polite">
-              {criterio && (
-                <span className={styles.criterio}>
-                  <FontAwesomeIcon icon={icons.rankingStar} aria-hidden="true" /> {criterio}
-                </span>
-              )}
-              <span className={styles.contagem}>
-                {inteiro.format(itens.length)} {itens.length === 1 ? visao.singular : visao.plural}
-                {buscaAplicada &&
-                  resposta.totalParticipantes != null &&
-                  ` de ${inteiro.format(resposta.totalParticipantes)}`}
+      {!carregando && resposta && mostrarResumo && (
+        <>
+          <RankingKpis
+            tipo={resposta.tipo}
+            itens={itens}
+            totalParticipantes={resposta.totalParticipantes}
+            mesNome={mesNome}
+          />
+          <RankingPodio
+            tipo={resposta.tipo}
+            itens={itens}
+            legenda={`Três primeiros colocados entre ${visao.plural} em ${mesNome} de ${periodo.ano}`}
+          />
+        </>
+      )}
+
+      {!carregando && resposta && itens.length > 0 && (
+        <div className={styles.card}>
+          <p className={styles.resumo} aria-live="polite">
+            {criterio && (
+              <span className={styles.criterio}>
+                <FontAwesomeIcon icon={icons.rankingStar} aria-hidden="true" /> {criterio}
               </span>
-            </p>
-            <RankingTabela
-              tipo={resposta.tipo}
-              itens={itens}
-              legenda={`Ranking de ${visao.plural} em ${mesNome} de ${periodo.ano}`}
-            />
-          </>
-        )}
-      </div>
+            )}
+            {buscaAplicada && (
+              <button
+                type="button"
+                className={styles.filtroAtivo}
+                onClick={limparBusca}
+                title="Remover filtro de busca"
+              >
+                “{buscaAplicada}”
+                <FontAwesomeIcon icon={icons.close} aria-hidden="true" />
+              </button>
+            )}
+            <span className={styles.contagem}>
+              {inteiro.format(itens.length)} {itens.length === 1 ? visao.singular : visao.plural}
+              {buscaAplicada &&
+                resposta.totalParticipantes != null &&
+                ` de ${inteiro.format(resposta.totalParticipantes)}`}
+            </span>
+          </p>
+          <RankingTabela
+            key={`${resposta.ano}-${resposta.mes}-${resposta.tipo}`}
+            tipo={resposta.tipo}
+            itens={itens}
+            legenda={`Ranking de ${visao.plural} em ${mesNome} de ${periodo.ano}`}
+          />
+          <p className={styles.nota}>
+            <FontAwesomeIcon icon={icons.info} aria-hidden="true" /> A pontuação soma a rentabilidade
+            (frete − pedágio) das viagens que contam no mês, com valorização por destino. Clique nos
+            títulos das colunas para reordenar a lista exibida.
+          </p>
+        </div>
+      )}
     </section>
   );
 }

@@ -9,8 +9,8 @@ export interface ErroRanking {
 }
 
 type Resultado =
-  | { chave: string; resposta: RankingResponse; erro: null }
-  | { chave: string; resposta: null; erro: ErroRanking };
+  | { chave: string; resposta: RankingResponse; erro: null; recebidoEm: number }
+  | { chave: string; resposta: null; erro: ErroRanking; recebidoEm: number };
 
 const MENSAGEM_FALHA = "Não foi possível carregar o ranking. Tente novamente.";
 const MENSAGEM_PERMISSAO = "Você não tem permissão para acessar o ranking.";
@@ -51,13 +51,18 @@ export function useRanking(consulta: ConsultaRanking, habilitado = true) {
     buscarRanking({ ano, mes, tipo, busca }, controle.signal)
       .then((resposta) => {
         if (controle.signal.aborted) return;
-        setResultado({ chave: chaveDaConsulta, resposta, erro: null });
+        setResultado({ chave: chaveDaConsulta, resposta, erro: null, recebidoEm: Date.now() });
       })
       .catch((error: unknown) => {
         if (controle.signal.aborted) return;
         // 401: o client já avisou o AuthContext e o app volta ao login — sem erro na tela
         if (error instanceof ApiRequestError && error.status === 401) return;
-        setResultado({ chave: chaveDaConsulta, resposta: null, erro: traduzirErro(error) });
+        setResultado({
+          chave: chaveDaConsulta,
+          resposta: null,
+          erro: traduzirErro(error),
+          recebidoEm: Date.now(),
+        });
       });
 
     // filtro mudou ou a tela fechou: cancela e descarta a resposta antiga
@@ -70,6 +75,8 @@ export function useRanking(consulta: ConsultaRanking, habilitado = true) {
     resposta: atual?.resposta ?? null,
     erro: atual?.erro ?? null,
     carregando: habilitado && !atual,
+    /** Quando a resposta exibida chegou do serviço (relógio do navegador). */
+    atualizadoEm: atual?.resposta ? new Date(atual.recebidoEm) : null,
     recarregar,
   };
 }
