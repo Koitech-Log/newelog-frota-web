@@ -15,7 +15,8 @@ interface RankingTabelaProps {
 type ChaveOrdem = "posicao" | "nome" | "viagens" | "resultado" | "pontuacao";
 type Direcao = "asc" | "desc";
 
-const MAX_DESTINOS = 2;
+/** Um chip e "+N": o título do grupo lista todos os destinos. */
+const MAX_DESTINOS = 1;
 
 /**
  * Lista do ranking. A posição exibida é sempre a devolvida pela API (com busca ativa

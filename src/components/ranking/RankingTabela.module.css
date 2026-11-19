@@ -302,7 +302,9 @@
   }
 }
 
-@media (max-width: 1000px) {
+/* abaixo de ~1500 px a coluna Destinos empurraria Viagens, Rentabilidade e
+   Pontuação para fora da vista; os destinos seguem na exportação CSV */
+@media (max-width: 1500px) {
   .table .colDestinos {
     display: none;
   }
