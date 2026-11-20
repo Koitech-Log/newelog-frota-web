@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { icons } from "./icons";
+import { icons, iconePorTipoVeiculo } from "./icons";
+import { Dropdown, type OpcaoDropdown } from "./Dropdown";
 import type { StatusMotorista } from "../types/motorista";
 import styles from "./DriverFilters.module.css";
 
@@ -29,6 +30,13 @@ const OPCOES_STATUS: {
   { valor: "all", rotulo: "Todos", icone: icons.gauge },
   { valor: "DISPONIVEL", rotulo: "Disponíveis", icone: icons.success, dotClass: "dotGreen" },
   { valor: "EM_OPERACAO", rotulo: "Em operação", icone: icons.truckFast, dotClass: "dotRed" },
+];
+
+const OPCOES_ORDEM: OpcaoDropdown<OrdemMotoristas>[] = [
+  { valor: "utilizacao", rotulo: "Utilização", icone: icons.gauge, descricao: "Mais tempo em operação primeiro" },
+  { valor: "viagens", rotulo: "Qtd. viagens", icone: icons.route, descricao: "Mais viagens realizadas primeiro" },
+  { valor: "valor", rotulo: "Valor agregado", icone: icons.coins, descricao: "Maior valor agregado primeiro" },
+  { valor: "nome", rotulo: "Nome (A-Z)", icone: icons.sortAlpha, descricao: "Ordem alfabética" },
 ];
 
 export function DriverFilters({
@@ -96,38 +104,37 @@ export function DriverFilters({
       <div className={styles.advanced}>
         <div className={styles.field}>
           <label htmlFor="fVeiculo">Tipo de veículo</label>
-          <div className={styles.selectWrap}>
-            <FontAwesomeIcon icon={icons.truck} aria-hidden />
-            <select
-              id="fVeiculo"
-              value={tipoVeiculo}
-              onChange={(e) => onTipoVeiculoChange(e.target.value)}
-            >
-              <option value="all">Todos os veículos</option>
-              {tiposVeiculoDisponiveis.map((tipo) => (
-                <option key={tipo} value={tipo}>
-                  {tipo}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Dropdown
+            id="fVeiculo"
+            valor={tipoVeiculo}
+            icone={icons.truck}
+            ativo={tipoVeiculo !== "all"}
+            opcoes={[
+              { valor: "all", rotulo: "Todos os veículos", icone: icons.truck },
+              // mantém o tipo selecionado visível mesmo se ele saiu da lista filtrada
+              ...(tipoVeiculo !== "all" && !tiposVeiculoDisponiveis.includes(tipoVeiculo)
+                ? [tipoVeiculo]
+                : []
+              ).concat(tiposVeiculoDisponiveis).map((tipo) => ({
+                valor: tipo,
+                rotulo: tipo,
+                icone: iconePorTipoVeiculo(tipo),
+              })),
+            ]}
+            onChange={onTipoVeiculoChange}
+          />
         </div>
 
         <div className={styles.field}>
           <label htmlFor="fSort">Ordenar por</label>
-          <div className={styles.selectWrap}>
-            <FontAwesomeIcon icon={icons.sliders} aria-hidden />
-            <select
-              id="fSort"
-              value={ordem}
-              onChange={(e) => onOrdemChange(e.target.value as OrdemMotoristas)}
-            >
-              <option value="utilizacao">Utilização</option>
-              <option value="viagens">Qtd. viagens</option>
-              <option value="valor">Valor agregado</option>
-              <option value="nome">Nome (A-Z)</option>
-            </select>
-          </div>
+          <Dropdown
+            id="fSort"
+            valor={ordem}
+            icone={icons.sliders}
+            ativo={ordem !== "utilizacao"}
+            opcoes={OPCOES_ORDEM}
+            onChange={onOrdemChange}
+          />
         </div>
 
         <button

@@ -1,16 +1,46 @@
-import { useState, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "./components/icons";
 import { Sidebar } from "./components/Sidebar";
 import { DriversPage } from "./pages/DriversPage";
 import { DashboardPage } from "./pages/DashboardPage";
-import { ProfileProvider } from "./context/ProfileContext";
+import { ProfileProvider, useProfile } from "./context/ProfileContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { ImportManifestoProvider } from "./context/ImportManifestoContext";
 import { FrotaProvider, useFrota } from "./context/FrotaContext";
 import { ImportCsvProvider, useImportCsv } from "./context/ImportCsvContext";
+import { UsuariosPage } from "./pages/UsuariosPage";
+import { RankingPage } from "./pages/RankingPage";
+import { TrocaSenhaPage } from "./pages/TrocaSenhaPage";
+import { BackToTop } from "./components/BackToTop";
+import { StatusConexao } from "./components/StatusConexao";
+import { useAtalhoBusca } from "./hooks/useAtalhoBusca";
+
+type Pagina = "home" | "drivers" | "ranking" | "usuarios";
+
+/** A página aberta sobrevive ao refresh (por aba); uma aba nova começa na visão geral. */
+const CHAVE_PAGINA = "newelog:pagina-ativa";
+
+const TITULOS: Record<Pagina, string> = {
+  home: "Visão geral",
+  drivers: "Motoristas",
+  ranking: "Ranking",
+  usuarios: "Usuários",
+};
+
+function lerPaginaInicial(perfilGestor: boolean): Pagina {
+  try {
+    const salva = sessionStorage.getItem(CHAVE_PAGINA);
+    if (salva === "drivers") return "drivers";
+    if (salva === "usuarios" && perfilGestor) return "usuarios";
+    if (salva === "ranking" && perfilGestor) return "ranking";
+  } catch {
+    /* storage indisponível: cai na visão geral */
+  }
+  return perfilGestor ? "home" : "drivers";
+}
 
 function MobileTopbar({
   onAbrirMenu,
@@ -76,32 +106,55 @@ function MobileTopbar({
 
 /** Layout da área logada: menu lateral com os totais + a página selecionada. */
 function Layout() {
-  // A Visão geral é a página inicial de todos os perfis (os valores financeiros
-  // dentro dela aparecem só para quem tem permissão).
-  const [paginaAtiva, setPaginaAtiva] = useState<
-    "home" | "drivers"
-  >("home");
+  const { perfil, podeVerFinanceiro } = useProfile();
 
-  // Ao trocar de página, volta ao topo (o scroll é do documento, então ele
-  // seria carregado de uma página para a outra).
+  // Só o gestor vê a visão geral (financeiro), o ranking e a página de usuários.
+  const [paginaAtiva, setPaginaAtiva] = useState<Pagina>(() =>
+    lerPaginaInicial(podeVerFinanceiro && perfil === "gestor"),
+  );
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(CHAVE_PAGINA, paginaAtiva);
+    } catch {
+      /* sem persistência: segue funcionando */
+    }
+  }, [paginaAtiva]);
+
+  useAtalhoBusca();
+
+  // Título da aba acompanha a página aberta
+  const paginaEfetiva: Pagina =
+    paginaAtiva === "usuarios" && perfil === "gestor"
+      ? "usuarios"
+      : paginaAtiva === "ranking" && perfil === "gestor"
+        ? "ranking"
+        : paginaAtiva === "home" && podeVerFinanceiro
+        ? "home"
+        : "drivers";
+  useEffect(() => {
+    document.title = `${TITULOS[paginaEfetiva]} · NEWELOG`;
+  }, [paginaEfetiva]);
+
+  // Ao trocar de página, volta ao topo (no primeiro render preserva o scroll do refresh)
+  const paginaAnterior = useRef(paginaAtiva);
   useLayoutEffect(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+    if (paginaAnterior.current === paginaAtiva) return;
+    paginaAnterior.current = paginaAtiva;
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [paginaAtiva]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const { total: motoristasCount, resumo } = useFrota();
-  const frotaCount = resumo.veiculos.length;
+  const { total: motoristasCount } = useFrota();
 
   return (
     <div className="app">
+      <StatusConexao />
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
         motoristasCount={motoristasCount}
-        frotaCount={frotaCount}
         activeTab={paginaAtiva}
         onNavigate={setPaginaAtiva}
       />
@@ -114,12 +167,21 @@ function Layout() {
 
         {/* Exibe a página selecionada no menu */}
         <main className="main">
-          {paginaAtiva === "home" ? (
-            <DashboardPage />
-          ) : (
-            <DriversPage />
-          )}
+          {/* key: a troca de página remonta o bloco e dispara a animação de entrada */}
+          <div key={paginaEfetiva} className="page-enter">
+            {paginaEfetiva === "usuarios" ? (
+              <UsuariosPage />
+            ) : paginaEfetiva === "ranking" ? (
+              <RankingPage />
+            ) : paginaEfetiva === "home" ? (
+              <DashboardPage />
+            ) : (
+              <DriversPage />
+            )}
+          </div>
         </main>
+
+        <BackToTop />
       </div>
     </div>
   );
@@ -143,16 +205,28 @@ function AppLogado() {
 function Gate() {
   const { sessao } = useAuth();
 
+  // Sem sessão (logout): o próximo acesso volta a abrir na visão geral
+  useEffect(() => {
+    if (!sessao) {
+      try {
+        sessionStorage.removeItem(CHAVE_PAGINA);
+      } catch {
+        /* ignora */
+      }
+    }
+  }, [sessao]);
+
   if (!sessao) {
     return <LoginPage />;
   }
 
+  if (sessao.mustChangePassword) {
+    return <TrocaSenhaPage />;
+  }
+
   // Ao trocar de usuário, o estado da área logada recomeça do zero.
   return (
-    <ProfileProvider
-      key={sessao.token}
-      perfil={sessao.perfil}
-    >
+    <ProfileProvider key={sessao.token} perfil={sessao.perfil}>
       <AppLogado />
     </ProfileProvider>
   );

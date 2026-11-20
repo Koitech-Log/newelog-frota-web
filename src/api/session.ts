@@ -31,8 +31,30 @@ export function limparSessao(): void {
   sessionStorage.removeItem(CHAVE);
 }
 
+export function atualizarSessao(sessao: LoginResponse): void {
+  const storage = localStorage.getItem(CHAVE) !== null ? localStorage : sessionStorage;
+  storage.setItem(CHAVE, JSON.stringify(sessao));
+}
+
 export function lerToken(): string | null {
   return lerSessao()?.token ?? null;
+}
+
+/**
+ * Id do usuário logado (claim "sub" do JWT). Usado só para a interface (ex.: não
+ * oferecer "desativar" no próprio usuário) — quem decide é sempre o back-end.
+ */
+export function lerIdUsuario(): number | null {
+  const token = lerToken();
+  if (!token) return null;
+  try {
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const claims = JSON.parse(atob(payload)) as { sub?: string };
+    const id = Number(claims.sub);
+    return Number.isFinite(id) ? id : null;
+  } catch {
+    return null;
+  }
 }
 
 // Os clientes HTTP (client.ts, manifesto.ts) avisam o AuthContext quando um

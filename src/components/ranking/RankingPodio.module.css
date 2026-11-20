@@ -1,0 +1,315 @@
+.podio {
+  --ouro: #e0a100;
+  --prata: #8d99ae;
+  --bronze: #b9692f;
+  margin-bottom: 20px;
+  padding: 26px 24px 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--star) 14%, transparent), transparent 62%),
+    var(--surface-0);
+  border: 1px solid var(--line-faint);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.lista {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  --cor: var(--ouro);
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 320px;
+  animation: subir 0.6s var(--ease-out) backwards;
+  animation-delay: var(--atraso, 0ms);
+}
+
+.ouro {
+  --cor: var(--ouro);
+}
+
+.prata {
+  --cor: var(--prata);
+}
+
+.bronze {
+  --cor: var(--bronze);
+}
+
+/* ordem visual de pódio: 2º · 1º · 3º */
+.pos1 {
+  order: 2;
+}
+
+.pos2 {
+  order: 1;
+}
+
+.pos3 {
+  order: 3;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px 16px 16px;
+  background: var(--surface-0);
+  border: 1px solid color-mix(in srgb, var(--cor) 38%, var(--line-faint));
+  border-bottom: 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  box-shadow: 0 -10px 28px -18px color-mix(in srgb, var(--cor) 70%, transparent);
+  text-align: center;
+  transition:
+    transform 0.25s var(--ease-out),
+    box-shadow 0.25s var(--ease-out);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 -14px 34px -14px color-mix(in srgb, var(--cor) 80%, transparent);
+}
+
+.pos1 .card {
+  padding-top: 26px;
+  border-width: 2px;
+  border-bottom: 0;
+}
+
+.medalha {
+  position: absolute;
+  top: -18px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--cor);
+  box-shadow: 0 6px 14px -4px color-mix(in srgb, var(--cor) 70%, transparent);
+  color: #fff;
+  font-size: 15px;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.pos1 .medalha {
+  top: -22px;
+  width: 44px;
+  height: 44px;
+  font-size: 19px;
+}
+
+.card:hover .medalha {
+  transform: scale(1.1) rotate(-6deg);
+}
+
+.lugar {
+  margin: 10px 0 0;
+  color: var(--cor);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--cor) 16%, var(--surface-1));
+  border: 2px solid color-mix(in srgb, var(--cor) 55%, transparent);
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.pos1 .avatar {
+  width: 64px;
+  height: 64px;
+  font-size: 21px;
+}
+
+.nome {
+  max-width: 100%;
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placa {
+  margin: 0;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.pontos {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  margin: 8px 0 2px;
+  color: var(--ink);
+  font-size: clamp(20px, 2.4vw, 26px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pos1 .pontos {
+  font-size: clamp(24px, 3vw, 32px);
+}
+
+.pontos small {
+  color: var(--ink-faint);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.detalhes {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  width: 100%;
+  margin: 4px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.detalhes dt {
+  color: var(--ink-faint);
+  font-size: 11px;
+}
+
+.detalhes dd {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.detalhes .negativo {
+  color: var(--red);
+}
+
+/* base do pódio, com alturas diferentes por colocação */
+.pedestal {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--cor) 30%, var(--surface-1)),
+    color-mix(in srgb, var(--cor) 10%, var(--surface-1))
+  );
+  border: 1px solid color-mix(in srgb, var(--cor) 38%, var(--line-faint));
+  border-bottom: 0;
+  color: color-mix(in srgb, var(--cor) 75%, var(--ink));
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.pos1 .pedestal {
+  height: 64px;
+}
+
+.pos2 .pedestal {
+  height: 46px;
+}
+
+.pos3 .pedestal {
+  height: 34px;
+}
+
+.somenteLeitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+@media (max-width: 760px) {
+  .podio {
+    padding: 28px 14px 18px;
+  }
+
+  .lista {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 30px;
+  }
+
+  .item {
+    max-width: none;
+  }
+
+  .pos1 {
+    order: 1;
+  }
+
+  .pos2 {
+    order: 2;
+  }
+
+  .pos3 {
+    order: 3;
+  }
+
+  .card {
+    border-bottom: 1px solid color-mix(in srgb, var(--cor) 38%, var(--line-faint));
+    border-radius: var(--radius-md);
+  }
+
+  .pos1 .card {
+    border-bottom-width: 2px;
+  }
+
+  .pedestal {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    animation: none;
+  }
+
+  .card,
+  .medalha {
+    transition: none;
+  }
+
+  .card:hover,
+  .card:hover .medalha {
+    transform: none;
+  }
+}

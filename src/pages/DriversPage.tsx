@@ -158,10 +158,18 @@ export function DriversPage() {
       )}
 
       {!erro && carregando && (
-        <p className={styles.loading}>
-          <FontAwesomeIcon icon={icons.spinner} spin size="lg" />
-          <span>Carregando motoristas…</span>
-        </p>
+        <div className={styles.grid} role="status" aria-label="Carregando motoristas">
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className={styles.esqCard} style={{ animationDelay: `${i * 60}ms` }}>
+              <span className={styles.esqAvatar} />
+              <span className={styles.esqLinhas}>
+                <i />
+                <i />
+              </span>
+              <span className={styles.esqPilula} />
+            </div>
+          ))}
+        </div>
       )}
 
       {!erro && !carregando && motoristasDaPagina.length === 0 && (

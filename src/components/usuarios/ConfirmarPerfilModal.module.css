@@ -1,0 +1,103 @@
+.scrim {
+    position: fixed;
+    inset: 0;
+    background: var(--shadow-scrim);
+    backdrop-filter: blur(2px);
+    z-index: 110;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+}
+
+.scrim.show {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.25s ease;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -46%) scale(0.97);
+    width: 420px;
+    max-width: 94vw;
+    background: var(--surface-0);
+    border: 1px solid var(--line-faint);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-pop);
+    z-index: 120;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, transform 0.3s var(--ease-out), visibility 0s linear 0.25s;
+}
+
+.modal.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+    transition: opacity 0.25s ease, transform 0.3s var(--ease-out);
+}
+
+.modal:focus {
+    outline: none;
+}
+
+.corpo {
+    padding: 22px 22px 8px;
+}
+
+.titulo {
+    margin: 0 0 8px;
+    font-size: 18px;
+    color: var(--ink);
+}
+
+.texto {
+    margin: 0;
+    color: var(--ink-dim);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.texto strong {
+    color: var(--ink);
+}
+
+.acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 22px 20px;
+}
+
+.cancelar,
+.confirmar {
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancelar {
+    background: transparent;
+    color: var(--ink-dim);
+    border: 1px solid var(--line);
+}
+
+.confirmar {
+    background: var(--btn);
+    color: #fff;
+    border: 1px solid var(--btn);
+}
+
+.confirmar:hover:not(:disabled) {
+    background: var(--btn-bright);
+}
+
+.cancelar:disabled,
+.confirmar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

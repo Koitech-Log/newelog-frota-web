@@ -1,0 +1,39 @@
+.faixa {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 180;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: min(94vw, 560px);
+  padding: 9px 16px;
+  border-radius: 0 0 12px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: var(--shadow-pop);
+  transform: translateX(-50%);
+  animation: desce 0.35s var(--ease-out);
+}
+
+.offline {
+  background: #c2362f;
+}
+
+.voltou {
+  background: #1f8f5b;
+}
+
+@keyframes desce {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faixa {
+    animation: none;
+  }
+}

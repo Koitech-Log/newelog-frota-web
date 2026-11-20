@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icons } from "../icons";
 import { useProfile } from "../../context/ProfileContext";
@@ -10,25 +11,47 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   motoristasCount?: number;
-  frotaCount?: number;
-  activeTab: "home" | "drivers";
-  onNavigate: (pagina: "home" | "drivers") => void;
+  activeTab: "home" | "drivers" | "ranking" | "usuarios";
+  onNavigate: (pagina: "home" | "drivers" | "ranking" | "usuarios") => void;
 }
 
 export function Sidebar({
   isOpen,
   onClose,
   motoristasCount = 0,
-  frotaCount = 0,
   activeTab,
   onNavigate,
 }: SidebarProps) {
-  const { perfil } = useProfile();
+  const { perfil, podeVerFinanceiro } = useProfile();
   const { sessao, signOut } = useAuth();
   const { abrirImportacao } = useImportCsv();
 
+  // Esc fecha o menu lateral aberto no mobile
+  useEffect(() => {
+    if (!isOpen) return;
+    const aoTeclar = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", aoTeclar);
+    return () => document.removeEventListener("keydown", aoTeclar);
+  }, [isOpen, onClose]);
+
   const handleNavClick = (tabKey: string) => {
-    if (tabKey === "home" || tabKey === "drivers") {
+    if (
+      tabKey === "home" ||
+      tabKey === "drivers" ||
+      tabKey === "ranking" ||
+      tabKey === "usuarios"
+    ) {
+      if (tabKey === "home" && !podeVerFinanceiro) {
+        return;
+      }
+
+      if ((tabKey === "usuarios" || tabKey === "ranking") && perfil !== "gestor") {
+        return;
+      }
+
+
       onNavigate(tabKey);
 
       if (window.innerWidth <= 900) {
@@ -48,8 +71,7 @@ export function Sidebar({
       return;
     }
 
-    // Para as restantes abas ainda não desenvolvidas.
-    console.info(`A página "${tabKey}" ainda não está implementada.`);
+    // Abas ainda não desenvolvidas aparecem como "Em breve" e não fazem nada.
   };
 
   return (
@@ -79,26 +101,18 @@ export function Sidebar({
         <nav aria-label="Navegação principal">
           <div className={styles.navGroupLabel}>Painel</div>
 
-          <button
-            className={`${styles.navlink} ${
-              activeTab === "home" ? styles.active : ""
-            }`}
-            type="button"
-            onClick={() => handleNavClick("home")}
-          >
-            <FontAwesomeIcon icon={icons.gauge} />
-            <span>Visão geral</span>
-          </button>
-
-          <button
-            className={styles.navlink}
-            type="button"
-            onClick={() => handleNavClick("fleet")}
-          >
-            <FontAwesomeIcon icon={icons.truck} />
-            <span>Frota</span>
-            <span className={styles.count}>{frotaCount}</span>
-          </button>
+          {podeVerFinanceiro && (
+            <button
+              className={`${styles.navlink} ${
+                activeTab === "home" ? styles.active : ""
+              }`}
+              type="button"
+              onClick={() => handleNavClick("home")}
+            >
+              <FontAwesomeIcon icon={icons.gauge} />
+              <span>Visão geral</span>
+            </button>
+          )}
 
           <button
             className={`${styles.navlink} ${
@@ -112,14 +126,31 @@ export function Sidebar({
             <span className={styles.count}>{motoristasCount}</span>
           </button>
 
-          <button
-            className={styles.navlink}
-            type="button"
-            onClick={() => handleNavClick("rank")}
-          >
-            <FontAwesomeIcon icon={icons.rankingStar} />
-            <span>Ranking</span>
-          </button>
+          {perfil === "gestor" && (
+            <button
+              className={`${styles.navlink} ${
+                activeTab === "ranking" ? styles.active : ""
+              }`}
+              type="button"
+              onClick={() => handleNavClick("ranking")}
+            >
+              <FontAwesomeIcon icon={icons.rankingStar} />
+              <span>Ranking</span>
+            </button>
+          )}
+
+          {perfil === "gestor" && (
+            <button
+              className={`${styles.navlink} ${
+                activeTab === "usuarios" ? styles.active : ""
+              }`}
+              type="button"
+              onClick={() => handleNavClick("usuarios")}
+            >
+              <FontAwesomeIcon icon={icons.users} />
+              <span>Usuários</span>
+            </button>
+          )}
 
           {/* DADOS */}
           <div className={styles.navGroupLabel}>Dados</div>
@@ -134,12 +165,15 @@ export function Sidebar({
           </button>
 
           <button
-            className={styles.navlink}
+            className={`${styles.navlink} ${styles.emBreve}`}
             type="button"
+            aria-disabled="true"
+            title="Em breve"
             onClick={() => handleNavClick("export")}
           >
             <FontAwesomeIcon icon={icons.fileExport} />
             <span>Exportar planilha</span>
+            <span className={styles.soon}>Em breve</span>
           </button>
         </nav>
 

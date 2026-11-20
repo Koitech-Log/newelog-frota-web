@@ -1,3 +1,4 @@
+
 import {
   createContext,
   useCallback,
@@ -7,8 +8,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { login, type LoginResponse } from "../api/auth";
+import { login, alterarSenha, type LoginResponse } from "../api/auth";
 import {
+  atualizarSessao,
   lerSessao,
   limparSessao,
   registrarAoExpirar,
@@ -21,6 +23,7 @@ interface AuthContextValue {
   aviso: string | null;
   signIn: (email: string, senha: string, lembrar: boolean) => Promise<void>;
   signOut: () => void;
+  trocarSenha: (senhaAtual: string, novaSenha: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -39,6 +42,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(() => {
     limparSessao();
     setSessao(null);
+  }, []);
+
+  const trocarSenha = useCallback(async (senhaAtual: string, novaSenha: string) => {
+    await alterarSenha(senhaAtual, novaSenha);
+
+    const atual = lerSessao();
+    if(atual){
+      const atualizada = { ...atual, mustChangePassword: false};
+      atualizarSessao(atualizada);
+      setSessao(atualizada);
+    }
   }, []);
 
   const expirar = useCallback(() => {
@@ -62,8 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [sessao, expirar]);
 
   const value = useMemo(
-    () => ({ sessao, aviso, signIn, signOut }),
-    [sessao, aviso, signIn, signOut],
+    () => ({ sessao, aviso, signIn, signOut, trocarSenha }),
+    [sessao, aviso, signIn, signOut, trocarSenha],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
