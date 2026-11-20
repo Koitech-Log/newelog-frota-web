@@ -8,15 +8,17 @@ export interface ErroRanking {
   mensagem: string;
 }
 
-type Resultado =
-  | { chave: string; resposta: RankingResponse; erro: null; recebidoEm: number }
-  | { chave: string; resposta: null; erro: ErroRanking; recebidoEm: number };
+type Resultado = { filtros: string; versao: string; recebidoEm: number } & (
+  | { resposta: RankingResponse; erro: null }
+  | { resposta: null; erro: ErroRanking }
+);
 
 const MENSAGEM_FALHA = "Não foi possível carregar o ranking. Tente novamente.";
 const MENSAGEM_PERMISSAO = "Você não tem permissão para acessar o ranking.";
 
-function chaveDe({ ano, mes, tipo, busca }: ConsultaRanking, tentativa: number) {
-  return `${ano}-${mes}-${tipo}-${tentativa}-${busca}`;
+/** Identifica o que está sendo consultado (período, visão e busca). */
+function chaveDosFiltros({ ano, mes, tipo, busca }: ConsultaRanking) {
+  return `${ano}-${mes}-${tipo}-${busca}`;
 }
 
 function traduzirErro(error: unknown): ErroRanking {
@@ -30,53 +32,63 @@ function traduzirErro(error: unknown): ErroRanking {
 
 /**
  * Consulta o ranking do período/visão/busca e refaz a consulta sozinho quando
- * qualquer um deles muda. Só o resultado da consulta mais recente é exposto:
- * enquanto ela não responde, `carregando` fica ligado e nada da anterior aparece.
+ * qualquer um deles muda, quando `gatilhoExterno` muda (ex.: importação de CSV
+ * concluída) ou ao chamar `recarregar`.
+ *
+ * Filtro novo: só o resultado da consulta mais recente é exposto; enquanto ela
+ * não responde, `carregando` fica ligado e nada do filtro anterior aparece.
+ * Mesmo filtro recarregado: a lista atual continua na tela com `atualizando`
+ * ligado até a resposta nova chegar (como no Dashboard).
  */
-export function useRanking(consulta: ConsultaRanking, habilitado = true) {
+export function useRanking(consulta: ConsultaRanking, gatilhoExterno = 0, habilitado = true) {
   const { ano, mes, tipo, busca } = consulta;
   const [resultado, setResultado] = useState<Resultado | null>(null);
   const [tentativa, setTentativa] = useState(0);
 
   const recarregar = useCallback(() => setTentativa((valor) => valor + 1), []);
 
-  const chave = chaveDe(consulta, tentativa);
+  const filtros = chaveDosFiltros(consulta);
+  const versao = `${tentativa}-${gatilhoExterno}`;
 
   useEffect(() => {
     if (!habilitado) return;
 
     const controle = new AbortController();
-    const chaveDaConsulta = chaveDe({ ano, mes, tipo, busca }, tentativa);
+    const base = {
+      filtros: chaveDosFiltros({ ano, mes, tipo, busca }),
+      versao: `${tentativa}-${gatilhoExterno}`,
+    };
 
     buscarRanking({ ano, mes, tipo, busca }, controle.signal)
       .then((resposta) => {
         if (controle.signal.aborted) return;
-        setResultado({ chave: chaveDaConsulta, resposta, erro: null, recebidoEm: Date.now() });
+        setResultado({ ...base, resposta, erro: null, recebidoEm: Date.now() });
       })
       .catch((error: unknown) => {
         if (controle.signal.aborted) return;
         // 401: o client já avisou o AuthContext e o app volta ao login — sem erro na tela
         if (error instanceof ApiRequestError && error.status === 401) return;
-        setResultado({
-          chave: chaveDaConsulta,
-          resposta: null,
-          erro: traduzirErro(error),
-          recebidoEm: Date.now(),
-        });
+        setResultado({ ...base, resposta: null, erro: traduzirErro(error), recebidoEm: Date.now() });
       });
 
-    // filtro mudou ou a tela fechou: cancela e descarta a resposta antiga
+    // filtro mudou, recarga pedida ou a tela fechou: cancela e descarta a resposta antiga
     return () => controle.abort();
-  }, [ano, mes, tipo, busca, tentativa, habilitado]);
+  }, [ano, mes, tipo, busca, tentativa, gatilhoExterno, habilitado]);
 
-  const atual = habilitado && resultado?.chave === chave ? resultado : null;
+  const doFiltro = habilitado && resultado?.filtros === filtros ? resultado : null;
+  const emDia = doFiltro?.versao === versao;
+  // recarga do mesmo filtro: mantém a lista anterior; um erro anterior não fica na tela
+  const exibido = emDia || doFiltro?.resposta ? doFiltro : null;
 
   return {
-    resposta: atual?.resposta ?? null,
-    erro: atual?.erro ?? null,
-    carregando: habilitado && !atual,
+    resposta: exibido?.resposta ?? null,
+    erro: exibido?.erro ?? null,
+    /** Nada para mostrar do filtro atual ainda (primeira carga, filtro novo ou nova tentativa após erro). */
+    carregando: habilitado && !exibido,
+    /** Recarga em segundo plano com a lista do mesmo filtro já na tela. */
+    atualizando: habilitado && !!exibido && !emDia,
     /** Quando a resposta exibida chegou do serviço (relógio do navegador). */
-    atualizadoEm: atual?.resposta ? new Date(atual.recebidoEm) : null,
+    atualizadoEm: exibido?.resposta ? new Date(exibido.recebidoEm) : null,
     recarregar,
   };
 }

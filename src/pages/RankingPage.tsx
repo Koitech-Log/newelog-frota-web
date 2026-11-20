@@ -7,6 +7,7 @@ import { RankingKpis } from "../components/ranking/RankingKpis";
 import { RankingPodio } from "../components/ranking/RankingPodio";
 import { RankingKpiSkeleton, RankingSkeleton } from "../components/ranking/RankingSkeleton";
 import { RankingTabela } from "../components/ranking/RankingTabela";
+import { useImportManifesto } from "../context/ImportManifestoContext";
 import { useProfile } from "../context/ProfileContext";
 import { useRanking } from "../hooks/useRanking";
 import { baixarCsv, numeroCsv, textoSeguro } from "../utils/exportarCsv";
@@ -104,12 +105,12 @@ function RankingConteudo() {
     if (!valor.trim()) setBuscaAplicada("");
   }
 
-  const { resposta, erro, carregando, atualizadoEm, recarregar } = useRanking({
-    ano: periodo.ano,
-    mes: periodo.mes,
-    tipo,
-    busca: buscaAplicada,
-  });
+  // importação de CSV concluída (botão do cabeçalho): refaz a consulta mantendo a lista na tela
+  const { versaoImportacao } = useImportManifesto();
+  const { resposta, erro, carregando, atualizando, atualizadoEm, recarregar } = useRanking(
+    { ano: periodo.ano, mes: periodo.mes, tipo, busca: buscaAplicada },
+    versaoImportacao
+  );
 
   const indiceAtual = indiceDoMes(hoje);
   const indicePeriodo = periodo.ano * 12 + (periodo.mes - 1);
@@ -146,7 +147,7 @@ function RankingConteudo() {
   const vazioDaBusca = !!buscaAplicada && resposta?.totalParticipantes !== 0;
   const criterio = resposta ? CRITERIOS[resposta.criterioOrdenacao] : undefined;
   // digitou e a consulta ainda não saiu: já conta como "atualizando" para o indicador
-  const ocupado = carregando || busca.trim() !== buscaAplicada;
+  const ocupado = carregando || atualizando || busca.trim() !== buscaAplicada;
   // indicadores e pódio descrevem o mês inteiro: com busca ativa só a lista filtrada aparece
   const mostrarResumo = !!resposta && itens.length > 0 && !buscaAplicada;
 
@@ -203,10 +204,14 @@ function RankingConteudo() {
               type="button"
               className={styles.botaoSecundario}
               onClick={recarregar}
-              disabled={carregando}
+              disabled={carregando || atualizando}
               title="Buscar os dados novamente"
             >
-              <FontAwesomeIcon icon={icons.retry} spin={carregando} aria-hidden="true" />
+              <FontAwesomeIcon
+                icon={icons.retry}
+                spin={carregando || atualizando}
+                aria-hidden="true"
+              />
               Atualizar
             </button>
             <button
